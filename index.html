@@ -4,273 +4,160 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NITRO METER</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-
-        body {
-            font-family: 'VT323', monospace;
-            background: #0a0a0a;
-            color: #fff;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-
-        .screen { display: none; }
+        body { font-family: 'VT323', monospace; background: #050505; color: white; margin: 0; padding: 0; overflow: hidden; }
+        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
         .screen.active { display: flex; }
-
-        .neon-green { color: #10f070; text-shadow: 0 0 15px #10f070; }
-        .neon-purple { color: #c026d3; text-shadow: 0 0 15px #c026d3; }
-
-        button {
-            font-family: 'VT323', monospace;
-            transition: all 0.2s;
-        }
-
-        .char {
-            padding: 2px 4px;
-            border-radius: 4px;
-            transition: all 0.08s;
-        }
-        .correct { color: #10f070; background: rgba(16, 240, 112, 0.2); }
-        .incorrect { color: #f00; background: rgba(255, 0, 0, 0.3); animation: shake 0.3s; }
-
-        @keyframes shake {
-            0%,100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
+        .neon-green { color: #10f070; text-shadow: 0 0 25px #10f070; }
+        .neon-purple { color: #c026d3; text-shadow: 0 0 25px #c026d3; }
+        input { background: #111; border: 4px solid #10f070; color: white; font-size: 2.4rem; padding: 25px 40px; width: 520px; border-radius: 16px; outline: none; margin-bottom: 25px; }
+        button { font-size: 2.8rem; padding: 25px 80px; border-radius: 16px; cursor: pointer; transition: all 0.2s; }
     </style>
 </head>
 <body>
 
     <!-- AUTH SCREEN -->
-    <div id="auth-screen" class="screen active flex-col items-center justify-center h-screen gap-12 bg-black">
-        <div class="flex items-center gap-4">
-            <div class="w-20 h-20 bg-[#10f070] rounded-2xl flex items-center justify-center text-6xl shadow-[0_0_40px_#10f070]">⚡</div>
-            <div>
-                <div class="text-7xl font-bold neon-green tracking-widest">NITRO METER</div>
-                <div class="text-2xl text-gray-400">type • fill • dominate</div>
-            </div>
+    <div id="auth-screen" class="screen active">
+        <div class="text-center mb-12">
+            <div class="flex justify-center mb-8"><div class="w-32 h-32 bg-[#10f070] rounded-3xl flex items-center justify-center text-8xl shadow-[0_0_70px_#10f070]">⚡</div></div>
+            <div class="text-8xl font-bold neon-green tracking-widest">NITRO METER</div>
         </div>
 
-        <div class="bg-zinc-950 border-4 border-[#10f070] rounded-3xl p-12 w-full max-w-md">
-            <div class="flex border-b border-gray-700 mb-8">
-                <button onclick="showTab(0)" id="tab0" class="flex-1 py-4 text-3xl neon-green">LOG IN</button>
-                <button onclick="showTab(1)" id="tab1" class="flex-1 py-4 text-3xl">SIGN UP</button>
+        <div class="bg-zinc-950 border-8 border-[#10f070] rounded-3xl p-16 w-full max-w-2xl">
+            <div id="auth-title" class="text-6xl neon-green text-center mb-12">LOG IN</div>
+
+            <div class="flex gap-8 mb-12">
+                <button onclick="selectMode(0)" id="login-tab" class="flex-1 py-6 text-4xl border-4 border-[#10f070] bg-[#10f070] text-black rounded-2xl">LOG IN</button>
+                <button onclick="selectMode(1)" id="signup-tab" class="flex-1 py-6 text-4xl border-4 border-white/30 rounded-2xl">SIGN UP</button>
             </div>
 
-            <!-- LOGIN -->
-            <div id="login-form">
-                <input id="login-username" placeholder="USERNAME" class="w-full bg-black border-2 border-gray-600 p-6 text-3xl rounded-2xl mb-6 outline-none">
-                <input id="login-password" type="password" placeholder="PASSWORD" class="w-full bg-black border-2 border-gray-600 p-6 text-3xl rounded-2xl mb-8 outline-none">
-                <button onclick="login()" class="w-full py-7 text-4xl bg-[#10f070] text-black rounded-3xl hover:brightness-110">ENTER ARENA</button>
-            </div>
+            <input id="username" placeholder="USERNAME" autocomplete="off"><br>
+            <input id="password" type="password" placeholder="PASSWORD" autocomplete="off"><br>
 
-            <!-- SIGNUP -->
-            <div id="signup-form" class="hidden">
-                <input id="signup-username" placeholder="CHOOSE USERNAME" class="w-full bg-black border-2 border-gray-600 p-6 text-3xl rounded-2xl mb-6 outline-none">
-                <input id="signup-password" type="password" placeholder="CHOOSE PASSWORD" class="w-full bg-black border-2 border-gray-600 p-6 text-3xl rounded-2xl mb-8 outline-none">
-                <button onclick="signup()" class="w-full py-7 text-4xl bg-[#10f070] text-black rounded-3xl hover:brightness-110">CREATE ACCOUNT</button>
-            </div>
+            <button onclick="handleDone()" class="mt-10 w-full bg-[#10f070] text-black hover:scale-105 text-4xl py-8">DONE</button>
         </div>
 
-        <div id="auth-msg" class="text-2xl min-h-[40px]"></div>
+        <div id="auth-msg" class="mt-12 text-3xl min-h-[60px] text-center"></div>
     </div>
 
-    <!-- MAIN MENU -->
-    <div id="menu-screen" class="screen flex-col items-center justify-center h-screen gap-10">
-        <div class="flex items-center gap-4 mb-8">
-            <div class="w-16 h-16 bg-[#10f070] rounded-2xl flex items-center justify-center text-5xl">⚡</div>
-            <div class="text-6xl neon-green">NITRO METER</div>
+    <!-- MENU SCREEN -->
+    <div id="menu-screen" class="screen">
+        <div class="text-center">
+            <div class="flex justify-center mb-6"><div class="w-28 h-28 bg-[#10f070] rounded-3xl flex items-center justify-center text-8xl shadow-[0_0_60px] shadow-[#10f070]">⚡</div></div>
+            <div class="text-7xl neon-green tracking-widest">NITRO METER</div>
+            <div class="text-4xl mt-6">Welcome back, <span id="menu-username" class="neon-purple"></span></div>
         </div>
 
-        <div class="text-3xl text-gray-400 mb-6">Welcome back, <span id="menu-username" class="neon-green"></span></div>
-
-        <div class="grid grid-cols-2 gap-6 w-full max-w-2xl px-8">
-            <button onclick="startGame()" class="bg-[#10f070] hover:bg-white text-black text-4xl py-14 rounded-3xl">▶ START TYPING</button>
-            <button onclick="showLeaderboard()" class="bg-transparent border-4 border-[#c026d3] hover:bg-[#c026d3] text-4xl py-14 rounded-3xl">🏆 LEADERBOARD</button>
-            <button onclick="showStats()" class="bg-transparent border-4 border-amber-400 hover:bg-amber-400 text-4xl py-14 rounded-3xl">📊 YOUR STATS</button>
-            <button onclick="showUpdates()" class="bg-transparent border-4 border-cyan-400 hover:bg-cyan-400 text-4xl py-14 rounded-3xl">📜 UPDATES</button>
+        <div class="grid grid-cols-2 gap-12 mt-20 w-full max-w-5xl px-10">
+            <button onclick="startGame()" class="bg-[#10f070] hover:bg-white text-black py-20 text-5xl rounded-3xl">▶ START TYPING</button>
+            <button onclick="showLeaderboard()" class="border-8 border-[#c026d3] hover:bg-[#c026d3] py-20 text-5xl rounded-3xl">🏆 GLOBAL LEADERBOARD</button>
+            <button onclick="showStats()" class="border-8 border-amber-400 hover:bg-amber-400 py-20 text-5xl rounded-3xl">📊 YOUR STATS</button>
+            <button onclick="showUpdates()" class="border-8 border-cyan-400 hover:bg-cyan-400 py-20 text-5xl rounded-3xl">📜 UPDATES</button>
         </div>
-
-        <button onclick="logout()" class="text-red-400 text-2xl mt-12 hover:text-red-500">LOG OUT</button>
+        <button onclick="logout()" class="mt-20 text-3xl text-red-400">LOG OUT</button>
     </div>
 
-    <!-- GAME SCREEN -->
-    <div id="game-screen" class="screen flex-col h-screen">
-        <div class="flex items-center justify-between px-10 py-6 border-b border-[#10f070]/30">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-[#10f070] rounded-xl flex items-center justify-center text-4xl">⚡</div>
-                <div>
-                    <div class="text-4xl neon-green">NITRO METER</div>
-                    <div class="text-lg text-gray-400 -mt-1">type sentences • fill the meter • never downgrade</div>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-12 text-3xl">
-                <div>LIVE <span id="live-wpm" class="text-[#10f070]">000</span></div>
-                <div>AVG <span id="avg-wpm" class="text-white">000</span></div>
-                <div class="px-8 py-2 bg-black border-2 border-purple-500 rounded-3xl">TIER <span id="tier" class="neon-purple">ROOKIE</span></div>
-            </div>
-
-            <div class="flex gap-4">
-                <button onclick="showLeaderboard()" class="px-10 py-5 border-2 border-purple-500 rounded-3xl text-xl hover:bg-purple-500/20">🏆 LEADERBOARD</button>
-                <button onclick="exitToMenu()" class="px-10 py-5 bg-red-600/80 hover:bg-red-600 rounded-3xl text-xl">EXIT</button>
-            </div>
-        </div>
-
-        <!-- METER -->
-        <div class="px-10 pt-8">
-            <div class="border-4 border-[#10f070] rounded-3xl p-6 bg-black">
-                <div class="flex justify-between mb-3 text-xl">
-                    <div class="neon-green">METER LEVEL</div>
-                    <div class="flex gap-8">
-                        <span id="sentences">0 sentences</span>
-                        <span id="effective" class="text-amber-400">0 effective</span>
-                        <span id="percent" class="text-3xl">0%</span>
-                    </div>
-                </div>
-                <div class="h-8 bg-zinc-900 rounded-2xl overflow-hidden border border-[#10f070]/50">
-                    <div id="meter-bar" class="h-full bg-gradient-to-r from-[#10f070] to-cyan-400 w-0 transition-all duration-500"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- TYPING AREA -->
-        <div class="flex-1 px-10 py-8 flex items-center">
-            <div id="sentence-display" class="w-full text-4xl leading-relaxed tracking-wider bg-zinc-950 border-2 border-zinc-700 p-10 rounded-3xl min-h-[220px]"></div>
-        </div>
-    </div>
-
-    <!-- LEADERBOARD MODAL -->
-    <div id="leaderboard-screen" class="screen fixed inset-0 bg-black/95 items-center justify-center">
-        <div class="bg-zinc-950 border-4 border-purple-500 rounded-3xl w-[1000px] max-h-[85vh] overflow-hidden">
-            <div class="p-8 border-b border-purple-500 flex items-center justify-between">
-                <div class="text-5xl neon-purple">NITRO HALL OF FAME</div>
-                <button onclick="hideLeaderboard()" class="text-4xl text-red-400">✕</button>
-            </div>
-            <div class="grid grid-cols-2 gap-8 p-8">
-                <!-- GLOBAL -->
-                <div>
-                    <div class="text-cyan-400 text-3xl mb-4">GLOBAL TOP TYPERS</div>
-                    <table id="global-table" class="w-full text-2xl"></table>
-                </div>
-                <!-- PERSONAL -->
-                <div>
-                    <div class="text-amber-400 text-3xl mb-4">YOUR PERSONAL BESTS</div>
-                    <table id="personal-table" class="w-full text-2xl"></table>
-                </div>
-            </div>
-        </div>
+    <!-- LEADERBOARD -->
+    <div id="leaderboard-screen" class="screen bg-black/95">
+        <div class="text-6xl neon-purple mb-10">NITRO HALL OF FAME</div>
+        <table id="global-leaderboard" class="text-4xl w-[1000px]"></table>
+        <button onclick="hideLeaderboard()" class="mt-12 px-20 py-8 text-3xl border-4 border-white/50 rounded-3xl">BACK</button>
     </div>
 
     <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyBj2JW101deM4Km1InqSB8VVqM_LdROAQQ",
+          authDomain: "wpmtest-ba4f2.firebaseapp.com",
+          projectId: "wpmtest-ba4f2",
+          storageBucket: "wpmtest-ba4f2.firebasestorage.app",
+          messagingSenderId: "822453718288",
+          appId: "1:822453718288:web:54880852639ab725d36995",
+          measurementId: "G-M8DY79KMK7"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
         let currentUser = null;
-        let users = JSON.parse(localStorage.getItem('nitroUsers')) || [];
-        let gameVars = { maxAvg: 8, correct: 0, attempts: 0, effective: 0, sentences: 0, startTime: null };
+        let currentMode = 0; // 0 = login, 1 = signup
 
-        const sentencesPool = ["The quick brown fox jumps over the lazy dog.", /* more sentences */];
-
-        function saveUsers() {
-            localStorage.setItem('nitroUsers', JSON.stringify(users));
+        function selectMode(mode) {
+            currentMode = mode;
+            document.getElementById('auth-title').textContent = mode === 0 ? "LOG IN" : "SIGN UP";
+            const loginTab = document.getElementById('login-tab');
+            const signupTab = document.getElementById('signup-tab');
+            if (mode === 0) {
+                loginTab.classList.add('bg-[#10f070]', 'text-black');
+                signupTab.classList.remove('bg-[#10f070]', 'text-black');
+            } else {
+                signupTab.classList.add('bg-[#10f070]', 'text-black');
+                loginTab.classList.remove('bg-[#10f070]', 'text-black');
+            }
         }
 
-        function showTab(n) {
-            document.getElementById('login-form').classList.toggle('hidden', n === 1);
-            document.getElementById('signup-form').classList.toggle('hidden', n === 0);
-        }
-
-        function signup() {
-            const u = document.getElementById('signup-username').value.trim();
-            const p = document.getElementById('signup-password').value.trim();
+        function handleDone() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
             const msg = document.getElementById('auth-msg');
 
-            if (users.find(x => x.username === u)) {
-                msg.innerHTML = `<span class="text-red-400">Username already taken!</span>`;
-                return;
+            if (!username || !password) return msg.textContent = "USERNAME AND PASSWORD REQUIRED";
+
+            if (currentMode === 1) { // SIGN UP
+                db.ref('users/' + username).once('value', snap => {
+                    if (snap.exists()) msg.textContent = "USERNAME ALREADY TAKEN";
+                    else {
+                        db.ref('users/' + username).set({ password: password });
+                        successLogin(username);
+                    }
+                });
+            } else { // LOG IN
+                db.ref('users/' + username).once('value', snap => {
+                    const data = snap.val();
+                    if (data && data.password === password) successLogin(username);
+                    else msg.textContent = "WRONG USERNAME OR PASSWORD";
+                });
             }
-            users.push({ username: u, password: p, bests: [] });
-            saveUsers();
-            currentUser = u;
-            document.getElementById('menu-username').textContent = u;
-            switchScreen('menu-screen');
         }
 
-        function login() {
-            const u = document.getElementById('login-username').value.trim();
-            const p = document.getElementById('login-password').value.trim();
-            const user = users.find(x => x.username === u && x.password === p);
-            const msg = document.getElementById('auth-msg');
-
-            if (!user) {
-                msg.innerHTML = `<span class="text-red-400">Wrong username or password</span>`;
-                return;
-            }
-            currentUser = u;
-            document.getElementById('menu-username').textContent = u;
+        function successLogin(username) {
+            currentUser = username;
+            document.getElementById('menu-username').textContent = username;
+            document.getElementById('auth-msg').textContent = "";
+            document.getElementById('username').value = "";
+            document.getElementById('password').value = "";
             switchScreen('menu-screen');
         }
 
         function logout() { currentUser = null; switchScreen('auth-screen'); }
-
         function switchScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         }
 
-        function startGame() {
-            switchScreen('game-screen');
-            resetGame();
-        }
-
-        function exitToMenu() { switchScreen('menu-screen'); }
-
-        // ==================== GAME LOGIC ====================
-        function resetGame() {
-            gameVars = { maxAvg: 8, correct: 0, attempts: 0, effective: 0, sentences: 0, startTime: null };
-            document.getElementById('meter-bar').style.width = '0%';
-            // render first sentence...
-        }
-
-        // Keyboard handler, meter fill, etc. (same logic as previous versions)
-
         function showLeaderboard() {
-            // Global Top 10 (real data from all users)
-            let allBests = [];
-            users.forEach(user => {
-                if (user.bests) allBests = allBests.concat(user.bests);
-            });
-            allBests.sort((a,b) => b.wpm - a.wpm);
-
-            let html = `<tr class="text-cyan-400"><th class="text-left py-2">RANK</th><th class="text-left">NAME</th><th class="text-right">WPM</th></tr>`;
-            allBests.slice(0,10).forEach((entry,i) => {
-                html += `<tr class="border-t border-gray-700"><td class="py-3">#${i+1}</td><td>${entry.name}</td><td class="text-right text-[#10f070]">${entry.wpm}</td></tr>`;
-            });
-            document.getElementById('global-table').innerHTML = html || "<tr><td colspan='3' class='py-10 text-center text-gray-500'>No scores yet. Be the first!</td></tr>";
-
-            // Personal
-            const userData = users.find(u => u.username === currentUser);
-            let phtml = `<tr class="text-amber-400"><th class="text-left py-2">RANK</th><th class="text-left">WPM</th><th class="text-right">DATE</th></tr>`;
-            if (userData && userData.bests && userData.bests.length) {
-                userData.bests.sort((a,b)=>b.wpm-a.wpm).forEach((b,i) => {
-                    phtml += `<tr class="border-t border-gray-700"><td class="py-3">#${i+1}</td><td class="text-[#10f070]">${b.wpm}</td><td class="text-right">${b.date}</td></tr>`;
-                });
-            } else {
-                phtml += `<tr><td colspan="3" class="py-12 text-center text-gray-500">No runs saved yet.<br>Fill the meter!</td></tr>`;
-            }
-            document.getElementById('personal-table').innerHTML = phtml;
-
             switchScreen('leaderboard-screen');
+            db.ref('leaderboard').orderByChild('wpm').limitToLast(10).once('value', snap => {
+                let html = `<tr class="text-cyan-400"><th class="text-left py-4">RANK</th><th class="text-left">PLAYER</th><th class="text-right">WPM</th></tr>`;
+                let rank = 1;
+                snap.forEach(child => {
+                    const d = child.val();
+                    html += `<tr class="border-t border-gray-700"><td class="py-5">#${rank++}</td><td>${d.username}</td><td class="text-right text-[#10f070]">${d.wpm}</td></tr>`;
+                });
+                document.getElementById('global-leaderboard').innerHTML = html || "<tr><td colspan='3' class='py-20 text-center'>No scores yet. Be the first!</td></tr>";
+            });
         }
 
-        function hideLeaderboard() { switchScreen('game-screen'); }
-
-        function showStats() { alert("Your full stats coming in next update!"); }
-        function showUpdates() { alert("April 14, 2026 — Game Launched with Login + Real Leaderboard"); }
+        function hideLeaderboard() { switchScreen('menu-screen'); }
+        function startGame() { alert("Game starting... (full typing game will be added next)"); }
+        function showStats() { alert("Your Stats"); }
+        function showUpdates() { alert("April 14, 2026 — Nitro Meter Launched!"); }
 
         window.onload = () => {
-            console.log("%cNITRO METER LIVE — Real Leaderboard + Auth", "color:#10f070; font-size:20px");
+            selectMode(0);
+            console.log("%cNITRO METER LIVE — Real Global Leaderboard Connected", "color:#10f070; font-size:20px");
         };
     </script>
 </body>

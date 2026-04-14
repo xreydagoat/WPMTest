@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NITRO METER • Type → Fill → Dominate</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+        :root {
+            --emerald: #10b981;
+            --cyan: #67e8f9;
+        }
+
+        body {
+            font-family: 'VT323', monospace;
+            background: #09090b;
+            color: white;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .char {
+            transition: all 0.05s ease;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 2.25rem;
+            line-height: 1;
+            display: inline-block;
+        }
+
+        .correct {
+            color: #10b981 !important;
+            background: rgba(16, 185, 129, 0.25);
+        }
+
+        .incorrect {
+            color: #ef4444 !important;
+            background: rgba(239, 68, 68, 0.35);
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+
+        .cursor::after {
+            content: '|';
+            animation: blink 0.8s step-end infinite;
+        }
+
+        .meter-fill {
+            transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #27272a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <!-- HEADER -->
+        <div class="header">
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <div style="width:60px; height:60px; background:#10b981; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:2.5rem; box-shadow:0 0 30px #10b98180;">⚡</div>
+                <div>
+                    <h1 style="font-size:3.5rem; font-weight:bold; letter-spacing:4px; color:#10b981; margin:0;">NITRO METER</h1>
+                    <p style="font-size:1.5rem; color:#a1a1aa; margin:-8px 0 0 0;">type sentences • fill the meter • never downgrade</p>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:3rem; font-size:1.8rem;">
+                <div style="text-align:right;">
+                    <div style="font-size:0.9rem; color:#10b981; letter-spacing:2px;">LIVE WPM</div>
+                    <div id="live-wpm-value" style="font-size:3rem; font-weight:bold;">000</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:0.9rem; color:#fbbf24; letter-spacing:2px;">AVG WPM</div>
+                    <div id="avg-wpm-value" style="font-size:3rem; font-weight:bold;">008</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:0.9rem; color:#c084fc; letter-spacing:2px;">TIER</div>
+                    <div id="tier-name" style="font-size:2.2rem; font-weight:bold; color:#c084fc;">ROOKIE</div>
+                </div>
+            </div>
+
+            <button onclick="resetGame()" 
+                    style="padding:1rem 2rem; font-size:1.5rem; background:#18181b; border:2px solid #3f3f46; border-radius:9999px; cursor:pointer; transition:all 0.2s;">
+                RESET RUN
+            </button>
+        </div>
+
+        <!-- METER -->
+        <div style="background:#18181b; border:4px solid #10b981; border-radius:24px; padding:2rem; margin-bottom:3rem; box-shadow:0 0 40px rgba(16,185,129,0.3);">
+            <div style="display:flex; justify-content:space-between; margin-bottom:1rem; font-size:1.8rem;">
+                <div style="color:#10b981;">METER LEVEL</div>
+                <div style="display:flex; gap:2rem; color:#d1d5db;">
+                    <div id="sentences-typed">0 sentences</div>
+                    <div id="effective-units" style="color:#fbbf24;">0 effective</div>
+                    <div id="progress-percent" style="font-size:2.5rem; font-weight:bold; color:white;">0%</div>
+                </div>
+            </div>
+            
+            <div style="height:52px; background:#09090b; border:2px solid #3f3f46; border-radius:9999px; overflow:hidden; position:relative;">
+                <div id="meter-fill" class="meter-fill" 
+                     style="height:100%; width:0%; background:linear-gradient(to right, #10b981, #67e8f9);"></div>
+            </div>
+        </div>
+
+        <!-- TYPING AREA -->
+        <div style="background:#18181b; border:2px solid #3f3f46; border-radius:24px; padding:3rem;">
+            <div id="sentence-display" 
+                 style="min-height:220px; font-size:2.4rem; line-height:1.4; letter-spacing:3px; display:flex; flex-wrap:wrap; gap:8px 12px;">
+            </div>
+
+            <div style="margin-top:2.5rem; display:flex; justify-content:space-between; font-size:1.4rem; color:#a1a1aa;">
+                <div>Accuracy: <span id="accuracy" style="color:#10b981; font-weight:bold;">100%</span></div>
+                <div id="status-text" style="color:#fbbf24;">Waiting for first keystroke...</div>
+                <div>Press any key to begin</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WIN MODAL -->
+    <div id="win-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); align-items:center; justify-content:center; z-index:1000;">
+        <div style="background:#18181b; border:4px solid #10b981; border-radius:24px; max-width:500px; width:90%; padding:3rem; text-align:center;">
+            <div style="font-size:6rem; margin-bottom:1rem;">🏆</div>
+            <h2 style="font-size:3.5rem; color:#10b981; margin:0 0 1rem 0;">METER FILLED!</h2>
+            <div id="win-text" style="font-size:2rem; margin:1.5rem 0;"></div>
+            <button onclick="hideWinModal(); resetGame()" 
+                    style="width:100%; padding:1.5rem; font-size:2rem; background:#10b981; color:black; border:none; border-radius:9999px; cursor:pointer; font-weight:bold;">
+                START NEW RUN
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== GAME DATA ====================
+        const sentences = [
+            "The quick brown fox jumps over the lazy dog.",
+            "Typing is a valuable skill in the modern world.",
+            "Practice makes perfect when it comes to typing.",
+            "The sun sets in the west every evening.",
+            "She sells seashells by the seashore.",
+            "A journey of a thousand miles begins with one step.",
+            "To be or not to be, that is the question.",
+            "What time is it? It's time to type faster!",
+            "Although it was difficult, she succeeded anyway.",
+            "He said, \"I can't believe how fast you're typing!\"",
+            "Punctuation, capitals, and numbers: 1, 2, 3 – let's go!",
+            "Success is not final, failure is not fatal.",
+            "In the middle of every difficulty lies opportunity.",
+            "The only way to do great work is to love what you do.",
+            "The future belongs to those who believe in the beauty of their dreams."
+        ];
+
+        let maxAverageWPM = 8;
+        let totalCorrectChars = 0;
+        let totalAttempts = 0;
+        let totalEffective = 0;
+        let sentencesCompleted = 0;
+        let startTime = null;
+        let currentSentenceIndex = 0;
+        let currentText = "";
+        let currentPos = 0;
+        let charSpans = [];
+        let gameRunning = true;
+
+        // DOM
+        let sentenceDisplay, meterFill, liveWPMValue, avgWPMValue, tierNameEl;
+        let accuracyEl, sentencesTypedEl, effectiveUnitsEl, progressPercentEl, statusText;
+
+        function getTierCredit(wpm) {
+            if (wpm <= 10) return 1;
+            if (wpm <= 30) return 3.5;
+            if (wpm <= 60) return 7;
+            if (wpm <= 90) return 11.5;
+            return 16;
+        }
+
+        function getTierName(wpm) {
+            if (wpm <= 10) return "ROOKIE";
+            if (wpm <= 30) return "SPEEDSTER";
+            if (wpm <= 60) return "RACER";
+            if (wpm <= 90) return "PRO";
+            return "LEGEND";
+        }
+
+        function renderSentence() {
+            currentText = sentences[currentSentenceIndex];
+            sentenceDisplay.innerHTML = "";
+            charSpans = [];
+
+            for (let char of currentText) {
+                const span = document.createElement('span');
+                span.className = "char";
+                span.textContent = char === " " ? "\u00A0" : char;
+                sentenceDisplay.appendChild(span);
+                charSpans.push(span);
+            }
+            currentPos = 0;
+        }
+
+        function handleKey(e) {
+            if (!gameRunning) return;
+            if (!startTime) {
+                startTime = Date.now();
+                statusText.textContent = "GO GO GO";
+            }
+
+            if (["Shift", "CapsLock", "Control", "Alt"].includes(e.key)) return;
+
+            totalAttempts++;
+            const expected = currentText[currentPos];
+
+            if (e.key === expected) {
+                charSpans[currentPos].classList.remove('incorrect');
+                charSpans[currentPos].classList.add('correct');
+                totalCorrectChars++;
+                currentPos++;
+
+                if (currentPos >= currentText.length) {
+                    completeSentence();
+                }
+            } else if (e.key.length === 1 || e.key === " ") {
+                charSpans[currentPos].classList.add('incorrect');
+            }
+
+            updateLiveStats();
+        }
+
+        function completeSentence() {
+            sentencesCompleted++;
+            const elapsedMin = (Date.now() - startTime) / 60000;
+            const currentWPM = elapsedMin > 0 ? Math.floor((totalCorrectChars / 5) / elapsedMin) : 0;
+
+            if (currentWPM > maxAverageWPM) maxAverageWPM = currentWPM;
+
+            const credit = getTierCredit(maxAverageWPM);
+            totalEffective += credit;
+
+            sentencesTypedEl.textContent = `${sentencesCompleted} sentences`;
+            effectiveUnitsEl.textContent = `${totalEffective.toFixed(1)} effective`;
+            const percent = Math.min(100, totalEffective);
+            progressPercentEl.textContent = `${percent.toFixed(0)}%`;
+            meterFill.style.width = `${percent}%`;
+
+            currentSentenceIndex = (currentSentenceIndex + 1) % sentences.length;
+            renderSentence();
+
+            if (totalEffective >= 100) showWinModal();
+
+            updateLiveStats();
+        }
+
+        function updateLiveStats() {
+            if (!startTime) return;
+            const elapsedMin = (Date.now() - startTime) / 60000;
+            const liveWPM = elapsedMin > 0 ? Math.floor((totalCorrectChars / 5) / elapsedMin) : 0;
+
+            liveWPMValue.textContent = String(liveWPM).padStart(3, '0');
+            avgWPMValue.textContent = String(Math.floor(maxAverageWPM)).padStart(3, '0');
+            tierNameEl.textContent = getTierName(maxAverageWPM);
+        }
+
+        function showWinModal() {
+            gameRunning = false;
+            document.getElementById('win-modal').style.display = 'flex';
+            document.getElementById('win-text').innerHTML = `
+                FINAL AVERAGE: <span style="color:#10b981; font-size:2.8rem;">${maxAverageWPM.toFixed(1)} WPM</span><br>
+                TIER LOCKED: <span style="color:#10b981;">${getTierName(maxAverageWPM)}</span>
+            `;
+        }
+
+        function hideWinModal() {
+            document.getElementById('win-modal').style.display = 'none';
+            gameRunning = true;
+        }
+
+        function resetGame() {
+            totalCorrectChars = 0;
+            totalAttempts = 0;
+            totalEffective = 0;
+            sentencesCompleted = 0;
+            startTime = null;
+            currentSentenceIndex = 0;
+            maxAverageWPM = 8;
+            gameRunning = true;
+
+            meterFill.style.width = "0%";
+            sentencesTypedEl.textContent = "0 sentences";
+            effectiveUnitsEl.textContent = "0 effective";
+            progressPercentEl.textContent = "0%";
+            renderSentence();
+            updateLiveStats();
+            statusText.textContent = "Waiting for first keystroke...";
+        }
+
+        function init() {
+            sentenceDisplay = document.getElementById('sentence-display');
+            meterFill = document.getElementById('meter-fill');
+            liveWPMValue = document.getElementById('live-wpm-value');
+            avgWPMValue = document.getElementById('avg-wpm-value');
+            tierNameEl = document.getElementById('tier-name');
+            accuracyEl = document.getElementById('accuracy');
+            sentencesTypedEl = document.getElementById('sentences-typed');
+            effectiveUnitsEl = document.getElementById('effective-units');
+            progressPercentEl = document.getElementById('progress-percent');
+            statusText = document.getElementById('status-text');
+
+            renderSentence();
+            document.addEventListener('keydown', handleKey);
+
+            setInterval(() => {
+                if (gameRunning) updateLiveStats();
+            }, 300);
+
+            console.log('%cNITRO METER v2 — Pure CSS • No warnings', 'color:#10b981; font-size:18px');
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

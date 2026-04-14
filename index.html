@@ -3,525 +3,338 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NITRO METER</title>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <title>NITRO METER • Type → Fill → Dominate</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-        
-        * { box-sizing: border-box; }
-        body { 
-            font-family: 'VT323', monospace; 
-            background: #050505; 
-            color: white; 
-            margin: 0; 
-            padding: 0; 
-            overflow: hidden; 
+
+        :root {
+            --emerald: #10b981;
+            --cyan: #67e8f9;
         }
-        
-        .screen { 
-            display: none; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            padding: 20px;
-        }
-        .screen.active { display: flex; }
-        
-        .neon-green { color: #10f070; text-shadow: 0 0 25px #10f070; }
-        .neon-purple { color: #c026d3; text-shadow: 0 0 25px #c026d3; }
-        
-        input { 
-            background: #111; 
-            border: 4px solid #10f070; 
-            color: white; 
+
+        body {
             font-family: 'VT323', monospace;
-            font-size: 2.4rem; 
-            padding: 25px 40px; 
-            width: 100%;
-            max-width: 520px;
-            border-radius: 16px; 
-            outline: none; 
-            margin-bottom: 25px;
+            background: #09090b;
+            color: white;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
         }
-        input:focus { box-shadow: 0 0 20px #10f070; }
-        
-        button { 
-            font-family: 'VT323', monospace;
-            font-size: 2.8rem; 
-            padding: 25px 80px; 
-            border-radius: 16px; 
-            cursor: pointer; 
-            transition: all 0.2s;
-            border: none;
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
         }
-        button:hover { transform: scale(1.05); }
-        button:focus { outline: 3px solid #10f070; outline-offset: 2px; }
-        
-        .char { 
-            padding: 2px 5px; 
-            font-size: 2.6rem; 
-            transition: all 0.08s; 
+
+        .char {
+            transition: all 0.05s ease;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 2.25rem;
+            line-height: 1;
+            display: inline-block;
         }
-        .correct { color: #10f070; background: rgba(16,240,112,0.2); }
-        .incorrect { color: #ff4444; background: rgba(255,68,68,0.3); animation: shake 0.3s; }
-        
-        @keyframes shake { 
-            0%,100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
+
+        .correct {
+            color: #10b981 !important;
+            background: rgba(16, 185, 129, 0.25);
         }
-        
-        .meter-container {
-            border: 4px solid #10f070;
-            border-radius: 12px;
-            padding: 20px;
-            background: #000;
-            width: 100%;
-            max-width: 600px;
+
+        .incorrect {
+            color: #ef4444 !important;
+            background: rgba(239, 68, 68, 0.35);
+            animation: shake 0.3s ease;
         }
-        
-        .meter-bar {
-            height: 48px;
-            background: #1a1a1a;
-            border-radius: 8px;
-            overflow: hidden;
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
         }
-        
-        #meter-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #10f070, #00ffff);
-            width: 0%;
-            transition: width 0.3s ease;
+
+        .cursor::after {
+            content: '|';
+            animation: blink 0.8s step-end infinite;
         }
-        
-        .error-msg { color: #ff4444; min-height: 30px; }
-        
-        @media (max-width: 768px) {
-            input { font-size: 1.8rem; padding: 15px 20px; }
-            button { font-size: 1.8rem; padding: 15px 40px; }
-            .char { font-size: 1.8rem; }
+
+        .meter-fill {
+            transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #27272a;
         }
     </style>
 </head>
 <body>
-
-    <!-- AUTH SCREEN -->
-    <div id="auth-screen" class="screen active">
-        <div style="text-align: center; margin-bottom: 40px;">
-            <div style="font-size: 80px; margin-bottom: 20px;">⚡</div>
-            <div style="font-size: 60px; font-weight: bold;" class="neon-green">NITRO METER</div>
-        </div>
-
-        <div style="background: #1a1a1a; border: 8px solid #10f070; border-radius: 20px; padding: 40px; width: 100%; max-width: 500px;">
-            <div id="auth-title" style="font-size: 48px; text-align: center; margin-bottom: 30px;" class="neon-green">LOG IN</div>
-
-            <div style="display: flex; gap: 20px; margin-bottom: 30px;">
-                <button onclick="app.selectMode(0)" id="login-tab" style="flex: 1; background: #10f070; color: black;">LOG IN</button>
-                <button onclick="app.selectMode(1)" id="signup-tab" style="flex: 1; background: transparent; border: 4px solid #666;">SIGN UP</button>
-            </div>
-
-            <input id="username" placeholder="USERNAME" autocomplete="off" aria-label="Username">
-            <input id="password" type="password" placeholder="PASSWORD" autocomplete="off" aria-label="Password">
-
-            <button onclick="app.handleAuth()" style="width: 100%; background: #10f070; color: black; font-size: 32px;">DONE</button>
-        </div>
-        <div id="auth-msg" class="error-msg" style="margin-top: 30px; font-size: 24px; text-align: center;"></div>
-    </div>
-
-    <!-- MENU SCREEN -->
-    <div id="menu-screen" class="screen">
-        <div style="text-align: center;">
-            <div style="font-size: 70px; margin-bottom: 20px;">⚡</div>
-            <div style="font-size: 56px;" class="neon-green">NITRO METER</div>
-            <div style="font-size: 28px; margin-top: 20px;">Welcome, <span id="menu-username" class="neon-purple"></span></div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 40px; width: 100%; max-width: 800px; padding: 0 20px;">
-            <button onclick="app.startGame()" style="background: #10f070; color: black; padding: 40px;">▶ START TYPING</button>
-            <button onclick="app.showLeaderboard()" style="border: 4px solid #c026d3; padding: 40px;">🏆 LEADERBOARD</button>
-            <button onclick="app.showStats()" style="border: 4px solid #ffaa00; padding: 40px;">📊 STATS</button>
-            <button onclick="app.logout()" style="border: 4px solid #ff4444; color: #ff4444; padding: 40px;">🚪 LOGOUT</button>
-        </div>
-    </div>
-
-    <!-- GAME SCREEN -->
-    <div id="game-screen" class="screen" style="flex-direction: column;">
-        <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px; border-bottom: 2px solid #10f070; width: 100%;">
-            <div style="font-size: 32px;" class="neon-green">⚡ NITRO METER</div>
-            <div style="display: flex; gap: 40px; font-size: 24px;">
-                <div>WPM: <span id="live-wpm" class="neon-green">000</span></div>
-                <div>TIER: <span id="tier-name" class="neon-purple">ROOKIE</span></div>
-            </div>
-            <button onclick="app.exitToMenu()" style="background: #ff4444; color: white; padding: 10px 20px;">EXIT</button>
-        </div>
-
-        <div style="padding: 20px; width: 100%; flex: 1; display: flex; flex-direction: column;">
-            <div class="meter-container">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 18px;">
-                    <span class="neon-green">PROGRESS</span>
-                    <span id="progress-percent" style="font-size: 24px;">0%</span>
-                </div>
-                <div class="meter-bar">
-                    <div id="meter-fill"></div>
-                </div>
-                <div style="margin-top: 10px; font-size: 16px; text-align: center;">
-                    <span id="sentences-typed">0 sentences</span> • 
-                    <span id="effective-units" class="neon-green">0 effective</span>
+    <div class="container">
+        
+        <!-- HEADER -->
+        <div class="header">
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <div style="width:60px; height:60px; background:#10b981; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:2.5rem; box-shadow:0 0 30px #10b98180;">⚡</div>
+                <div>
+                    <h1 style="font-size:3.5rem; font-weight:bold; letter-spacing:4px; color:#10b981; margin:0;">NITRO METER</h1>
+                    <p style="font-size:1.5rem; color:#a1a1aa; margin:-8px 0 0 0;">type sentences • fill the meter • never downgrade</p>
                 </div>
             </div>
 
-            <div id="sentence-display" style="margin-top: 30px; flex: 1; font-size: 32px; line-height: 1.8; background: #0a0a0a; border: 2px solid #333; padding: 30px; border-radius: 12px; overflow-y: auto; word-wrap: break-word;"></div>
-        </div>
-    </div>
+            <div style="display:flex; gap:3rem; font-size:1.8rem;">
+                <div style="text-align:right;">
+                    <div style="font-size:0.9rem; color:#10b981; letter-spacing:2px;">LIVE WPM</div>
+                    <div id="live-wpm-value" style="font-size:3rem; font-weight:bold;">000</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:0.9rem; color:#fbbf24; letter-spacing:2px;">AVG WPM</div>
+                    <div id="avg-wpm-value" style="font-size:3rem; font-weight:bold;">008</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:0.9rem; color:#c084fc; letter-spacing:2px;">TIER</div>
+                    <div id="tier-name" style="font-size:2.2rem; font-weight:bold; color:#c084fc;">ROOKIE</div>
+                </div>
+            </div>
 
-    <!-- LEADERBOARD -->
-    <div id="leaderboard-screen" class="screen">
-        <div style="font-size: 48px; margin-bottom: 30px;" class="neon-purple">NITRO HALL OF FAME</div>
-        <div id="leaderboard-content" style="width: 100%; max-width: 700px; font-size: 24px; max-height: 70vh; overflow-y: auto;"></div>
-        <button onclick="app.switchScreen('menu-screen')" style="margin-top: 30px; border: 4px solid #666; padding: 15px 40px; margin-top: auto;">← BACK</button>
+            <button onclick="resetGame()" 
+                    style="padding:1rem 2rem; font-size:1.5rem; background:#18181b; border:2px solid #3f3f46; border-radius:9999px; cursor:pointer; transition:all 0.2s;">
+                RESET RUN
+            </button>
+        </div>
+
+        <!-- METER -->
+        <div style="background:#18181b; border:4px solid #10b981; border-radius:24px; padding:2rem; margin-bottom:3rem; box-shadow:0 0 40px rgba(16,185,129,0.3);">
+            <div style="display:flex; justify-content:space-between; margin-bottom:1rem; font-size:1.8rem;">
+                <div style="color:#10b981;">METER LEVEL</div>
+                <div style="display:flex; gap:2rem; color:#d1d5db;">
+                    <div id="sentences-typed">0 sentences</div>
+                    <div id="effective-units" style="color:#fbbf24;">0 effective</div>
+                    <div id="progress-percent" style="font-size:2.5rem; font-weight:bold; color:white;">0%</div>
+                </div>
+            </div>
+            
+            <div style="height:52px; background:#09090b; border:2px solid #3f3f46; border-radius:9999px; overflow:hidden; position:relative;">
+                <div id="meter-fill" class="meter-fill" 
+                     style="height:100%; width:0%; background:linear-gradient(to right, #10b981, #67e8f9);"></div>
+            </div>
+        </div>
+
+        <!-- TYPING AREA -->
+        <div style="background:#18181b; border:2px solid #3f3f46; border-radius:24px; padding:3rem;">
+            <div id="sentence-display" 
+                 style="min-height:220px; font-size:2.4rem; line-height:1.4; letter-spacing:3px; display:flex; flex-wrap:wrap; gap:8px 12px;">
+            </div>
+
+            <div style="margin-top:2.5rem; display:flex; justify-content:space-between; font-size:1.4rem; color:#a1a1aa;">
+                <div>Accuracy: <span id="accuracy" style="color:#10b981; font-weight:bold;">100%</span></div>
+                <div id="status-text" style="color:#fbbf24;">Waiting for first keystroke...</div>
+                <div>Press any key to begin</div>
+            </div>
+        </div>
     </div>
 
     <!-- WIN MODAL -->
-    <div id="win-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); justify-content: center; align-items: center; z-index: 1000;">
-        <div style="background: #1a1a1a; border: 8px solid #10f070; border-radius: 20px; padding: 60px; text-align: center; max-width: 500px;">
-            <div style="font-size: 80px; margin-bottom: 20px;">🏆</div>
-            <h2 style="font-size: 48px; margin-bottom: 20px;" class="neon-green">METER FILLED!</h2>
-            <div id="win-text" style="font-size: 28px; margin-bottom: 30px;"></div>
-            <button onclick="app.saveScore()" style="background: #10f070; color: black; width: 100%; margin-bottom: 15px;">SAVE SCORE</button>
-            <button onclick="app.resetAndMenu()" style="background: transparent; border: 4px solid #666; width: 100%;">NEW RUN</button>
+    <div id="win-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); align-items:center; justify-content:center; z-index:1000;">
+        <div style="background:#18181b; border:4px solid #10b981; border-radius:24px; max-width:500px; width:90%; padding:3rem; text-align:center;">
+            <div style="font-size:6rem; margin-bottom:1rem;">🏆</div>
+            <h2 style="font-size:3.5rem; color:#10b981; margin:0 0 1rem 0;">METER FILLED!</h2>
+            <div id="win-text" style="font-size:2rem; margin:1.5rem 0;"></div>
+            <button onclick="hideWinModal(); resetGame()" 
+                    style="width:100%; padding:1.5rem; font-size:2rem; background:#10b981; color:black; border:none; border-radius:9999px; cursor:pointer; font-weight:bold;">
+                START NEW RUN
+            </button>
         </div>
     </div>
 
     <script>
-        // ==================== CONFIG (Move to .env in production) ====================
-        // SECURITY: Never commit API keys. Use Firebase Admin SDK for backend validation.
-        const firebaseConfig = {
-            apiKey: "AIzaSyBj2JW101deM4Km1InqSB8VVqM_LdROAQQ",
-            authDomain: "wpmtest-ba4f2.firebaseapp.com",
-            projectId: "wpmtest-ba4f2",
-            databaseURL: "https://wpmtest-ba4f2-default-rtdb.firebaseio.com"
-        };
+        // ==================== GAME DATA ====================
+        const sentences = [
+            "The quick brown fox jumps over the lazy dog.",
+            "Typing is a valuable skill in the modern world.",
+            "Practice makes perfect when it comes to typing.",
+            "The sun sets in the west every evening.",
+            "She sells seashells by the seashore.",
+            "A journey of a thousand miles begins with one step.",
+            "To be or not to be, that is the question.",
+            "What time is it? It's time to type faster!",
+            "Although it was difficult, she succeeded anyway.",
+            "He said, \"I can't believe how fast you're typing!\"",
+            "Punctuation, capitals, and numbers: 1, 2, 3 – let's go!",
+            "Success is not final, failure is not fatal.",
+            "In the middle of every difficulty lies opportunity.",
+            "The only way to do great work is to love what you do.",
+            "The future belongs to those who believe in the beauty of their dreams."
+        ];
 
-        // ==================== APP MODULE ====================
-        const app = (() => {
-            let state = {
-                user: null,
-                mode: 0, // 0 = login, 1 = signup
-                isPlaying: false,
-                gameData: null,
-                statsInterval: null
-            };
+        let maxAverageWPM = 8;
+        let totalCorrectChars = 0;
+        let totalAttempts = 0;
+        let totalEffective = 0;
+        let sentencesCompleted = 0;
+        let startTime = null;
+        let currentSentenceIndex = 0;
+        let currentText = "";
+        let currentPos = 0;
+        let charSpans = [];
+        let gameRunning = true;
 
-            const sentences = [
-                "The quick brown fox jumps over the lazy dog.",
-                "Typing is a valuable skill in the modern world.",
-                "Practice makes perfect when it comes to typing.",
-                "The sun sets in the west every evening.",
-                "She sells seashells by the seashore.",
-                "A journey of a thousand miles begins with one step.",
-                "To be or not to be, that is the question.",
-                "What time is it? It's time to type faster!",
-                "Although it was difficult, she succeeded anyway.",
-                "He said, \"I can't believe how fast you're typing!\"",
-                "Punctuation, capitals, and numbers: 1, 2, 3 – let's go!",
-                "Success is not final, failure is not fatal.",
-                "In the middle of every difficulty lies opportunity.",
-                "The only way to do great work is to love what you do.",
-                "The future belongs to those who believe in the beauty of their dreams."
-            ];
+        // DOM
+        let sentenceDisplay, meterFill, liveWPMValue, avgWPMValue, tierNameEl;
+        let accuracyEl, sentencesTypedEl, effectiveUnitsEl, progressPercentEl, statusText;
 
-            // Initialize Firebase
-            firebase.initializeApp(firebaseConfig);
-            const db = firebase.database();
+        function getTierCredit(wpm) {
+            if (wpm <= 10) return 1;
+            if (wpm <= 30) return 3.5;
+            if (wpm <= 60) return 7;
+            if (wpm <= 90) return 11.5;
+            return 16;
+        }
 
-            // ==================== GAME LOGIC ====================
-            function initGame() {
-                state.gameData = {
-                    maxWPM: 8,
-                    correctChars: 0,
-                    sentencesCompleted: 0,
-                    startTime: null,
-                    sentenceIndex: 0,
-                    currentText: "",
-                    currentPos: 0,
-                    charSpans: [],
-                    totalEffective: 0
-                };
+        function getTierName(wpm) {
+            if (wpm <= 10) return "ROOKIE";
+            if (wpm <= 30) return "SPEEDSTER";
+            if (wpm <= 60) return "RACER";
+            if (wpm <= 90) return "PRO";
+            return "LEGEND";
+        }
+
+        function renderSentence() {
+            currentText = sentences[currentSentenceIndex];
+            sentenceDisplay.innerHTML = "";
+            charSpans = [];
+
+            for (let char of currentText) {
+                const span = document.createElement('span');
+                span.className = "char";
+                span.textContent = char === " " ? "\u00A0" : char;
+                sentenceDisplay.appendChild(span);
+                charSpans.push(span);
+            }
+            currentPos = 0;
+        }
+
+        function handleKey(e) {
+            if (!gameRunning) return;
+            if (!startTime) {
+                startTime = Date.now();
+                statusText.textContent = "GO GO GO";
             }
 
-            function getTierName(wpm) {
-                if (wpm <= 10) return "ROOKIE";
-                if (wpm <= 30) return "SPEEDSTER";
-                if (wpm <= 60) return "RACER";
-                if (wpm <= 90) return "PRO";
-                return "LEGEND";
-            }
+            if (["Shift", "CapsLock", "Control", "Alt"].includes(e.key)) return;
 
-            function getTierCredit(wpm) {
-                const tiers = { 10: 1, 30: 3.5, 60: 7, 90: 11.5 };
-                for (const [threshold, credit] of Object.entries(tiers)) {
-                    if (wpm <= threshold) return credit;
+            totalAttempts++;
+            const expected = currentText[currentPos];
+
+            if (e.key === expected) {
+                charSpans[currentPos].classList.remove('incorrect');
+                charSpans[currentPos].classList.add('correct');
+                totalCorrectChars++;
+                currentPos++;
+
+                if (currentPos >= currentText.length) {
+                    completeSentence();
                 }
-                return 16;
+            } else if (e.key.length === 1 || e.key === " ") {
+                charSpans[currentPos].classList.add('incorrect');
             }
 
-            function renderSentence() {
-                const g = state.gameData;
-                g.currentText = sentences[g.sentenceIndex];
-                const display = document.getElementById('sentence-display');
-                display.innerHTML = "";
-                g.charSpans = [];
-                
-                for (let char of g.currentText) {
-                    const span = document.createElement('span');
-                    span.className = "char";
-                    span.textContent = char === " " ? "\u00A0" : char;
-                    display.appendChild(span);
-                    g.charSpans.push(span);
-                }
-                g.currentPos = 0;
-            }
+            updateLiveStats();
+        }
 
-            function handleKeyInput(e) {
-                if (!state.isPlaying || !state.gameData.startTime) return;
-                if (["Shift", "CapsLock", "Control", "Alt", "Meta"].includes(e.key)) return;
+        function completeSentence() {
+            sentencesCompleted++;
+            const elapsedMin = (Date.now() - startTime) / 60000;
+            const currentWPM = elapsedMin > 0 ? Math.floor((totalCorrectChars / 5) / elapsedMin) : 0;
 
-                const g = state.gameData;
-                const expected = g.currentText[g.currentPos];
+            if (currentWPM > maxAverageWPM) maxAverageWPM = currentWPM;
 
-                if (e.key === expected) {
-                    g.charSpans[g.currentPos].classList.remove('incorrect');
-                    g.charSpans[g.currentPos].classList.add('correct');
-                    g.correctChars++;
-                    g.currentPos++;
+            const credit = getTierCredit(maxAverageWPM);
+            totalEffective += credit;
 
-                    if (g.currentPos >= g.currentText.length) completeSentence();
-                } else if (e.key.length === 1 || e.key === " ") {
-                    g.charSpans[g.currentPos].classList.add('incorrect');
-                }
-            }
+            sentencesTypedEl.textContent = `${sentencesCompleted} sentences`;
+            effectiveUnitsEl.textContent = `${totalEffective.toFixed(1)} effective`;
+            const percent = Math.min(100, totalEffective);
+            progressPercentEl.textContent = `${percent.toFixed(0)}%`;
+            meterFill.style.width = `${percent}%`;
 
-            function completeSentence() {
-                const g = state.gameData;
-                g.sentencesCompleted++;
-                const elapsedMin = (Date.now() - g.startTime) / 60000;
-                const currentWPM = elapsedMin > 0 ? Math.floor((g.correctChars / 5) / elapsedMin) : 0;
+            currentSentenceIndex = (currentSentenceIndex + 1) % sentences.length;
+            renderSentence();
 
-                if (currentWPM > g.maxWPM) g.maxWPM = currentWPM;
+            if (totalEffective >= 100) showWinModal();
 
-                g.totalEffective += getTierCredit(g.maxWPM);
+            updateLiveStats();
+        }
 
-                updateDisplay();
+        function updateLiveStats() {
+            if (!startTime) return;
+            const elapsedMin = (Date.now() - startTime) / 60000;
+            const liveWPM = elapsedMin > 0 ? Math.floor((totalCorrectChars / 5) / elapsedMin) : 0;
 
-                g.sentenceIndex = (g.sentenceIndex + 1) % sentences.length;
-                renderSentence();
+            liveWPMValue.textContent = String(liveWPM).padStart(3, '0');
+            avgWPMValue.textContent = String(Math.floor(maxAverageWPM)).padStart(3, '0');
+            tierNameEl.textContent = getTierName(maxAverageWPM);
+        }
 
-                if (g.totalEffective >= 100) showWinModal();
-            }
+        function showWinModal() {
+            gameRunning = false;
+            document.getElementById('win-modal').style.display = 'flex';
+            document.getElementById('win-text').innerHTML = `
+                FINAL AVERAGE: <span style="color:#10b981; font-size:2.8rem;">${maxAverageWPM.toFixed(1)} WPM</span><br>
+                TIER LOCKED: <span style="color:#10b981;">${getTierName(maxAverageWPM)}</span>
+            `;
+        }
 
-            function updateDisplay() {
-                const g = state.gameData;
-                document.getElementById('sentences-typed').textContent = `${g.sentencesCompleted} sentences`;
-                document.getElementById('effective-units').textContent = `${g.totalEffective.toFixed(1)} effective`;
-                const percent = Math.min(100, g.totalEffective);
-                document.getElementById('progress-percent').textContent = `${percent.toFixed(0)}%`;
-                document.getElementById('meter-fill').style.width = `${percent}%`;
-                
-                if (g.startTime) {
-                    const elapsedMin = (Date.now() - g.startTime) / 60000;
-                    const liveWPM = elapsedMin > 0 ? Math.floor((g.correctChars / 5) / elapsedMin) : 0;
-                    document.getElementById('live-wpm').textContent = String(liveWPM).padStart(3, '0');
-                    document.getElementById('tier-name').textContent = getTierName(g.maxWPM);
-                }
-            }
+        function hideWinModal() {
+            document.getElementById('win-modal').style.display = 'none';
+            gameRunning = true;
+        }
 
-            function showWinModal() {
-                state.isPlaying = false;
-                const g = state.gameData;
-                document.getElementById('win-text').innerHTML = `
-                    FINAL WPM: <span class="neon-green" style="font-size: 40px;">${g.maxWPM.toFixed(1)}</span><br>
-                    TIER: <span class="neon-purple" style="font-size: 40px;">${getTierName(g.maxWPM)}</span>
-                `;
-                document.getElementById('win-modal').style.display = 'flex';
-            }
+        function resetGame() {
+            totalCorrectChars = 0;
+            totalAttempts = 0;
+            totalEffective = 0;
+            sentencesCompleted = 0;
+            startTime = null;
+            currentSentenceIndex = 0;
+            maxAverageWPM = 8;
+            gameRunning = true;
 
-            // ==================== AUTH ====================
-            function selectMode(mode) {
-                state.mode = mode;
-                document.getElementById('auth-title').textContent = mode === 0 ? "LOG IN" : "SIGN UP";
-                const loginBtn = document.getElementById('login-tab');
-                const signupBtn = document.getElementById('signup-tab');
-                if (mode === 0) {
-                    loginBtn.style.background = '#10f070';
-                    loginBtn.style.color = 'black';
-                    signupBtn.style.background = 'transparent';
-                    signupBtn.style.color = 'white';
-                } else {
-                    signupBtn.style.background = '#10f070';
-                    signupBtn.style.color = 'black';
-                    loginBtn.style.background = 'transparent';
-                    loginBtn.style.color = 'white';
-                }
-            }
+            meterFill.style.width = "0%";
+            sentencesTypedEl.textContent = "0 sentences";
+            effectiveUnitsEl.textContent = "0 effective";
+            progressPercentEl.textContent = "0%";
+            renderSentence();
+            updateLiveStats();
+            statusText.textContent = "Waiting for first keystroke...";
+        }
 
-            function handleAuth() {
-                const username = document.getElementById('username').value.trim();
-                const password = document.getElementById('password').value.trim();
-                const msgEl = document.getElementById('auth-msg');
+        function init() {
+            sentenceDisplay = document.getElementById('sentence-display');
+            meterFill = document.getElementById('meter-fill');
+            liveWPMValue = document.getElementById('live-wpm-value');
+            avgWPMValue = document.getElementById('avg-wpm-value');
+            tierNameEl = document.getElementById('tier-name');
+            accuracyEl = document.getElementById('accuracy');
+            sentencesTypedEl = document.getElementById('sentences-typed');
+            effectiveUnitsEl = document.getElementById('effective-units');
+            progressPercentEl = document.getElementById('progress-percent');
+            statusText = document.getElementById('status-text');
 
-                if (!username || !password) {
-                    msgEl.textContent = "USERNAME AND PASSWORD REQUIRED";
-                    return;
-                }
+            renderSentence();
+            document.addEventListener('keydown', handleKey);
 
-                if (username.length < 3 || password.length < 6) {
-                    msgEl.textContent = "MIN 3 chars (user), 6 chars (pass)";
-                    return;
-                }
+            setInterval(() => {
+                if (gameRunning) updateLiveStats();
+            }, 300);
 
-                if (state.mode === 1) {
-                    // SIGN UP
-                    db.ref('users/' + username).once('value')
-                        .then(snap => {
-                            if (snap.exists()) {
-                                msgEl.textContent = "USERNAME ALREADY TAKEN";
-                            } else {
-                                // TODO: Hash password server-side before storing
-                                db.ref('users/' + username).set({ password })
-                                    .then(() => successLogin(username))
-                                    .catch(err => msgEl.textContent = "Sign up failed");
-                            }
-                        })
-                        .catch(err => msgEl.textContent = "Database error");
-                } else {
-                    // LOG IN
-                    db.ref('users/' + username).once('value')
-                        .then(snap => {
-                            const data = snap.val();
-                            if (data && data.password === password) {
-                                successLogin(username);
-                            } else {
-                                msgEl.textContent = "WRONG USERNAME OR PASSWORD";
-                            }
-                        })
-                        .catch(err => msgEl.textContent = "Login failed");
-                }
-            }
+            console.log('%cNITRO METER v2 — Pure CSS • No warnings', 'color:#10b981; font-size:18px');
+        }
 
-            function successLogin(username) {
-                state.user = username;
-                document.getElementById('username').value = '';
-                document.getElementById('password').value = '';
-                document.getElementById('auth-msg').textContent = '';
-                document.getElementById('menu-username').textContent = username;
-                switchScreen('menu-screen');
-            }
-
-            function logout() {
-                state.user = null;
-                switchScreen('auth-screen');
-            }
-
-            // ==================== SCREENS ====================
-            function switchScreen(id) {
-                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-                document.getElementById(id).classList.add('active');
-            }
-
-            function startGame() {
-                switchScreen('game-screen');
-                initGame();
-                renderSentence();
-                state.isPlaying = true;
-                state.gameData.startTime = Date.now();
-                document.addEventListener('keydown', handleKeyInput);
-                
-                // Clear old interval
-                if (state.statsInterval) clearInterval(state.statsInterval);
-                state.statsInterval = setInterval(updateDisplay, 300);
-            }
-
-            function exitToMenu() {
-                state.isPlaying = false;
-                document.removeEventListener('keydown', handleKeyInput);
-                if (state.statsInterval) {
-                    clearInterval(state.statsInterval);
-                    state.statsInterval = null;
-                }
-                switchScreen('menu-screen');
-            }
-
-            function saveScore() {
-                if (state.user) {
-                    db.ref('leaderboard/' + Date.now()).set({
-                        username: state.user,
-                        wpm: Math.floor(state.gameData.maxWPM),
-                        timestamp: Date.now()
-                    }).catch(err => console.error('Score save failed:', err));
-                }
-                resetAndMenu();
-            }
-
-            function resetAndMenu() {
-                document.getElementById('win-modal').style.display = 'none';
-                exitToMenu();
-            }
-
-            function showLeaderboard() {
-                switchScreen('leaderboard-screen');
-                const content = document.getElementById('leaderboard-content');
-                content.innerHTML = '<div style="text-align: center;">Loading...</div>';
-
-                db.ref('leaderboard').orderByChild('wpm').limitToLast(10).once('value')
-                    .then(snap => {
-                        let html = '<table style="width: 100%; border-collapse: collapse;"><tr style="border-bottom: 2px solid #10f070; padding: 15px 0;"><th style="text-align: left;">RANK</th><th style="text-align: left;">PLAYER</th><th style="text-align: right;">WPM</th></tr>';
-                        let rank = 1;
-                        const entries = [];
-                        snap.forEach(child => {
-                            entries.push(child.val());
-                        });
-                        entries.reverse();
-                        entries.forEach(d => {
-                            html += `<tr style="border-bottom: 1px solid #333; padding: 12px 0;"><td>#${rank++}</td><td>${escapeHtml(d.username)}</td><td style="text-align: right; color: #10f070;">${d.wpm}</td></tr>`;
-                        });
-                        html += '</table>';
-                        content.innerHTML = html || '<div style="text-align: center; color: #666;">No scores yet!</div>';
-                    })
-                    .catch(err => {
-                        content.innerHTML = '<div style="color: #ff4444;">Failed to load leaderboard</div>';
-                    });
-            }
-
-            function showStats() {
-                alert("Personal stats coming soon!");
-            }
-
-            // Prevent XSS
-            function escapeHtml(text) {
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
-
-            return {
-                selectMode,
-                handleAuth,
-                logout,
-                switchScreen,
-                startGame,
-                exitToMenu,
-                saveScore,
-                resetAndMenu,
-                showLeaderboard,
-                showStats
-            };
-        })();
-
-        window.addEventListener('load', () => {
-            app.selectMode(0);
-        });
+        window.onload = init;
     </script>
 </body>
 </html>

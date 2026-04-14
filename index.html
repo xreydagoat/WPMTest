@@ -15,6 +15,10 @@
         .neon-purple { color: #c026d3; text-shadow: 0 0 25px #c026d3; }
         input { background: #111; border: 4px solid #10f070; color: white; font-size: 2.4rem; padding: 25px 40px; width: 520px; border-radius: 16px; outline: none; margin-bottom: 25px; }
         button { font-size: 2.8rem; padding: 25px 80px; border-radius: 16px; cursor: pointer; transition: all 0.2s; }
+        .char { padding: 2px 5px; font-size: 2.6rem; transition: all 0.08s; }
+        .correct { color: #10f070; background: rgba(16,240,112,0.2); }
+        .incorrect { color: #ff4444; background: rgba(255,68,68,0.3); animation: shake 0.3s; }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
     </style>
 </head>
 <body>
@@ -26,7 +30,7 @@
             <div class="text-8xl font-bold neon-green tracking-widest">NITRO METER</div>
         </div>
 
-        <div class="bg-zinc-950 border-8 border-[#10f070] rounded-3xl p-16 w-full max-w-2xl">
+        <div class="bg-zinc-950 border-8 border-[#10f070] rounded-3xl p-16 w-full max-w-2xl shadow-2xl">
             <div id="auth-title" class="text-6xl neon-green text-center mb-12">LOG IN</div>
 
             <div class="flex gap-8 mb-12">
@@ -39,7 +43,6 @@
 
             <button onclick="handleDone()" class="mt-10 w-full bg-[#10f070] text-black hover:scale-105 text-4xl py-8">DONE</button>
         </div>
-
         <div id="auth-msg" class="mt-12 text-3xl min-h-[60px] text-center"></div>
     </div>
 
@@ -57,17 +60,65 @@
             <button onclick="showStats()" class="border-8 border-amber-400 hover:bg-amber-400 py-20 text-5xl rounded-3xl">📊 YOUR STATS</button>
             <button onclick="showUpdates()" class="border-8 border-cyan-400 hover:bg-cyan-400 py-20 text-5xl rounded-3xl">📜 UPDATES</button>
         </div>
-        <button onclick="logout()" class="mt-20 text-3xl text-red-400">LOG OUT</button>
+        <button onclick="logout()" class="mt-20 text-3xl text-red-400 hover:text-red-500">LOG OUT</button>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="game-screen" class="screen flex-col">
+        <div class="flex items-center justify-between px-12 py-6 border-b border-[#10f070]/30 w-full">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-[#10f070] rounded-2xl flex items-center justify-center text-5xl">⚡</div>
+                <div class="text-4xl neon-green">NITRO METER</div>
+            </div>
+            <div class="flex gap-12 text-3xl">
+                <div>LIVE <span id="live-wpm" class="text-[#10f070]">000</span></div>
+                <div>AVG <span id="avg-wpm" class="text-white">008</span></div>
+                <div>TIER <span id="tier-name" class="neon-purple">ROOKIE</span></div>
+            </div>
+            <button onclick="exitToMenu()" class="px-10 py-4 bg-red-600 rounded-3xl text-xl">EXIT</button>
+        </div>
+
+        <div class="px-12 pt-8 w-full max-w-6xl mx-auto">
+            <div class="border-4 border-[#10f070] rounded-3xl p-6 bg-black">
+                <div class="flex justify-between mb-4 text-xl">
+                    <div class="neon-green">METER LEVEL</div>
+                    <div class="flex gap-8">
+                        <span id="sentences-typed">0 sentences</span>
+                        <span id="effective-units" class="text-amber-400">0 effective</span>
+                        <span id="progress-percent" class="text-4xl">0%</span>
+                    </div>
+                </div>
+                <div class="h-12 bg-zinc-900 rounded-2xl overflow-hidden">
+                    <div id="meter-fill" class="h-full bg-gradient-to-r from-[#10f070] to-cyan-400 w-0 transition-all"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1 px-12 py-10 w-full max-w-6xl mx-auto">
+            <div id="sentence-display" class="text-4xl leading-relaxed tracking-wider bg-zinc-950 border-2 border-zinc-700 p-10 rounded-3xl min-h-[260px]"></div>
+        </div>
     </div>
 
     <!-- LEADERBOARD -->
     <div id="leaderboard-screen" class="screen bg-black/95">
         <div class="text-6xl neon-purple mb-10">NITRO HALL OF FAME</div>
-        <table id="global-leaderboard" class="text-4xl w-[1000px]"></table>
+        <table id="global-leaderboard" class="text-4xl w-[1100px]"></table>
         <button onclick="hideLeaderboard()" class="mt-12 px-20 py-8 text-3xl border-4 border-white/50 rounded-3xl">BACK</button>
     </div>
 
+    <!-- WIN MODAL -->
+    <div id="win-modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+        <div class="bg-zinc-950 border-8 border-[#10f070] rounded-3xl p-16 text-center max-w-lg">
+            <div class="text-8xl mb-6">🏆</div>
+            <h2 class="text-6xl neon-green mb-6">METER FILLED!</h2>
+            <div id="win-text" class="text-4xl mb-10"></div>
+            <button onclick="saveScoreAndReset()" class="bg-[#10f070] text-black text-4xl px-16 py-8 rounded-3xl mb-6">SAVE TO LEADERBOARD</button>
+            <button onclick="hideWinModalAndReset()" class="text-3xl text-gray-400">NEW RUN</button>
+        </div>
+    </div>
+
     <script>
+        // ==================== YOUR FIREBASE ====================
         const firebaseConfig = {
           apiKey: "AIzaSyBj2JW101deM4Km1InqSB8VVqM_LdROAQQ",
           authDomain: "wpmtest-ba4f2.firebaseapp.com",
@@ -75,26 +126,183 @@
           storageBucket: "wpmtest-ba4f2.firebasestorage.app",
           messagingSenderId: "822453718288",
           appId: "1:822453718288:web:54880852639ab725d36995",
-          measurementId: "G-M8DY79KMK7"
+          measurementId: "G-M8DY79KMK7",
+          databaseURL: "https://wpmtest-ba4f2-default-rtdb.firebaseio.com"
         };
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         let currentUser = null;
-        let currentMode = 0; // 0 = login, 1 = signup
+        let currentMode = 0;
 
+        // ==================== GAME VARIABLES ====================
+        let maxAverageWPM = 8;
+        let totalCorrectChars = 0;
+        let totalAttempts = 0;
+        let totalEffective = 0;
+        let sentencesCompleted = 0;
+        let startTime = null;
+        let currentSentenceIndex = 0;
+        let currentText = "";
+        let currentPos = 0;
+        let charSpans = [];
+        let gameRunning = true;
+
+        const sentences = [
+            "The quick brown fox jumps over the lazy dog.",
+            "Typing is a valuable skill in the modern world.",
+            "Practice makes perfect when it comes to typing.",
+            "The sun sets in the west every evening.",
+            "She sells seashells by the seashore.",
+            "A journey of a thousand miles begins with one step.",
+            "To be or not to be, that is the question.",
+            "What time is it? It's time to type faster!",
+            "Although it was difficult, she succeeded anyway.",
+            "He said, \"I can't believe how fast you're typing!\"",
+            "Punctuation, capitals, and numbers: 1, 2, 3 – let's go!",
+            "Success is not final, failure is not fatal.",
+            "In the middle of every difficulty lies opportunity.",
+            "The only way to do great work is to love what you do.",
+            "The future belongs to those who believe in the beauty of their dreams."
+        ];
+
+        function getTierCredit(wpm) {
+            if (wpm <= 10) return 1;
+            if (wpm <= 30) return 3.5;
+            if (wpm <= 60) return 7;
+            if (wpm <= 90) return 11.5;
+            return 16;
+        }
+
+        function getTierName(wpm) {
+            if (wpm <= 10) return "ROOKIE";
+            if (wpm <= 30) return "SPEEDSTER";
+            if (wpm <= 60) return "RACER";
+            if (wpm <= 90) return "PRO";
+            return "LEGEND";
+        }
+
+        function renderSentence() {
+            currentText = sentences[currentSentenceIndex];
+            const display = document.getElementById('sentence-display');
+            display.innerHTML = "";
+            charSpans = [];
+            for (let char of currentText) {
+                const span = document.createElement('span');
+                span.className = "char";
+                span.textContent = char === " " ? "\u00A0" : char;
+                display.appendChild(span);
+                charSpans.push(span);
+            }
+            currentPos = 0;
+        }
+
+        function handleKey(e) {
+            if (!gameRunning || !startTime) return;
+            if (["Shift","CapsLock","Control","Alt"].includes(e.key)) return;
+
+            totalAttempts++;
+            const expected = currentText[currentPos];
+
+            if (e.key === expected) {
+                charSpans[currentPos].classList.remove('incorrect');
+                charSpans[currentPos].classList.add('correct');
+                totalCorrectChars++;
+                currentPos++;
+
+                if (currentPos >= currentText.length) completeSentence();
+            } else if (e.key.length === 1 || e.key === " ") {
+                charSpans[currentPos].classList.add('incorrect');
+            }
+            updateLiveStats();
+        }
+
+        function completeSentence() {
+            sentencesCompleted++;
+            const elapsedMin = (Date.now() - startTime) / 60000;
+            const currentWPM = elapsedMin > 0 ? Math.floor((totalCorrectChars / 5) / elapsedMin) : 0;
+
+            if (currentWPM > maxAverageWPM) maxAverageWPM = currentWPM;
+
+            totalEffective += getTierCredit(maxAverageWPM);
+
+            document.getElementById('sentences-typed').textContent = `${sentencesCompleted} sentences`;
+            document.getElementById('effective-units').textContent = `${totalEffective.toFixed(1)} effective`;
+            const percent = Math.min(100, totalEffective);
+            document.getElementById('progress-percent').textContent = `${percent.toFixed(0)}%`;
+            document.getElementById('meter-fill').style.width = `${percent}%`;
+
+            currentSentenceIndex = (currentSentenceIndex + 1) % sentences.length;
+            renderSentence();
+
+            if (totalEffective >= 100) showWinModal();
+            updateLiveStats();
+        }
+
+        function updateLiveStats() {
+            if (!startTime) return;
+            const elapsedMin = (Date.now() - startTime) / 60000;
+            const liveWPM = elapsedMin > 0 ? Math.floor((totalCorrectChars / 5) / elapsedMin) : 0;
+            document.getElementById('live-wpm').textContent = String(liveWPM).padStart(3, '0');
+            document.getElementById('avg-wpm').textContent = String(Math.floor(maxAverageWPM)).padStart(3, '0');
+            document.getElementById('tier-name').textContent = getTierName(maxAverageWPM);
+        }
+
+        function showWinModal() {
+            gameRunning = false;
+            document.getElementById('win-modal').classList.remove('hidden');
+            document.getElementById('win-text').innerHTML = `
+                FINAL AVERAGE: <span class="text-5xl text-[#10f070]">${maxAverageWPM.toFixed(1)} WPM</span><br>
+                TIER LOCKED: <span class="text-5xl">${getTierName(maxAverageWPM)}</span>
+            `;
+        }
+
+        function saveScoreAndReset() {
+            if (currentUser) {
+                db.ref('leaderboard/' + Date.now()).set({
+                    username: currentUser,
+                    wpm: Math.floor(maxAverageWPM),
+                    timestamp: Date.now()
+                });
+            }
+            hideWinModalAndReset();
+        }
+
+        function hideWinModalAndReset() {
+            document.getElementById('win-modal').classList.add('hidden');
+            resetGame();
+            exitToMenu();
+        }
+
+        function resetGame() {
+            maxAverageWPM = 8;
+            totalCorrectChars = 0;
+            totalAttempts = 0;
+            totalEffective = 0;
+            sentencesCompleted = 0;
+            startTime = null;
+            currentSentenceIndex = 0;
+            gameRunning = true;
+            document.getElementById('meter-fill').style.width = '0%';
+            document.getElementById('sentences-typed').textContent = '0 sentences';
+            document.getElementById('effective-units').textContent = '0 effective';
+            document.getElementById('progress-percent').textContent = '0%';
+            renderSentence();
+        }
+
+        // ==================== AUTH & SCREENS ====================
         function selectMode(mode) {
             currentMode = mode;
             document.getElementById('auth-title').textContent = mode === 0 ? "LOG IN" : "SIGN UP";
-            const loginTab = document.getElementById('login-tab');
-            const signupTab = document.getElementById('signup-tab');
+            const l = document.getElementById('login-tab');
+            const s = document.getElementById('signup-tab');
             if (mode === 0) {
-                loginTab.classList.add('bg-[#10f070]', 'text-black');
-                signupTab.classList.remove('bg-[#10f070]', 'text-black');
+                l.classList.add('bg-[#10f070]','text-black');
+                s.classList.remove('bg-[#10f070]','text-black');
             } else {
-                signupTab.classList.add('bg-[#10f070]', 'text-black');
-                loginTab.classList.remove('bg-[#10f070]', 'text-black');
+                s.classList.add('bg-[#10f070]','text-black');
+                l.classList.remove('bg-[#10f070]','text-black');
             }
         }
 
@@ -105,15 +313,15 @@
 
             if (!username || !password) return msg.textContent = "USERNAME AND PASSWORD REQUIRED";
 
-            if (currentMode === 1) { // SIGN UP
+            if (currentMode === 1) {
                 db.ref('users/' + username).once('value', snap => {
                     if (snap.exists()) msg.textContent = "USERNAME ALREADY TAKEN";
                     else {
-                        db.ref('users/' + username).set({ password: password });
+                        db.ref('users/' + username).set({ password });
                         successLogin(username);
                     }
                 });
-            } else { // LOG IN
+            } else {
                 db.ref('users/' + username).once('value', snap => {
                     const data = snap.val();
                     if (data && data.password === password) successLogin(username);
@@ -126,8 +334,6 @@
             currentUser = username;
             document.getElementById('menu-username').textContent = username;
             document.getElementById('auth-msg').textContent = "";
-            document.getElementById('username').value = "";
-            document.getElementById('password').value = "";
             switchScreen('menu-screen');
         }
 
@@ -135,6 +341,18 @@
         function switchScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
+        }
+
+        function startGame() {
+            switchScreen('game-screen');
+            resetGame();
+            document.addEventListener('keydown', handleKey);
+            setInterval(() => { if (gameRunning) updateLiveStats(); }, 300);
+        }
+
+        function exitToMenu() {
+            document.removeEventListener('keydown', handleKey);
+            switchScreen('menu-screen');
         }
 
         function showLeaderboard() {
@@ -146,18 +364,17 @@
                     const d = child.val();
                     html += `<tr class="border-t border-gray-700"><td class="py-5">#${rank++}</td><td>${d.username}</td><td class="text-right text-[#10f070]">${d.wpm}</td></tr>`;
                 });
-                document.getElementById('global-leaderboard').innerHTML = html || "<tr><td colspan='3' class='py-20 text-center'>No scores yet. Be the first!</td></tr>";
+                document.getElementById('global-leaderboard').innerHTML = html || "<tr><td colspan='3' class='py-20 text-center text-gray-500'>No scores yet. Be the first legend!</td></tr>";
             });
         }
 
         function hideLeaderboard() { switchScreen('menu-screen'); }
-        function startGame() { alert("Game starting... (full typing game will be added next)"); }
-        function showStats() { alert("Your Stats"); }
-        function showUpdates() { alert("April 14, 2026 — Nitro Meter Launched!"); }
+        function showStats() { alert("Your personal stats coming soon!"); }
+        function showUpdates() { alert("April 14, 2026 — Nitro Meter vFINAL Released!"); }
 
         window.onload = () => {
             selectMode(0);
-            console.log("%cNITRO METER LIVE — Real Global Leaderboard Connected", "color:#10f070; font-size:20px");
+            console.log("%cNITRO METER FINAL — Everything polished and ready", "color:#10f070; font-size:22px");
         };
     </script>
 </body>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NITRO METER • Type → Fill → Dominate</title>
+  <title>NITRO METER: OVERDRIVE</title>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
@@ -11,61 +11,96 @@
     :root {
       --main: #10b981;
       --accent: #67e8f9;
-      --bg: #09090b;
-      --card: #18181b;
+      --bg: #07070a;
+      --card: rgba(24, 24, 27, 0.94);
       --muted: #a1a1aa;
       --danger: #ef4444;
       --gold: #fbbf24;
+      --purple: #a855f7;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       font-family: 'VT323', monospace;
       background:
-        radial-gradient(circle at top left, rgba(16, 185, 129, 0.14), transparent 35%),
-        radial-gradient(circle at bottom right, rgba(103, 232, 249, 0.1), transparent 40%),
-        var(--bg);
+        radial-gradient(circle at 15% 10%, color-mix(in srgb, var(--main) 24%, transparent), transparent 35%),
+        radial-gradient(circle at 85% 85%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 42%),
+        linear-gradient(135deg, #050506, var(--bg));
       color: white;
       margin: 0;
       min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(circle, black, transparent 76%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body.combo-fire {
+      animation: screenPulse 0.7s ease;
+    }
+
+    @keyframes screenPulse {
+      0%,100% { filter: none; }
+      50% { filter: saturate(1.5) brightness(1.15); }
+    }
+
+    button, select {
+      font-family: inherit;
     }
 
     button {
-      font-family: inherit;
       cursor: pointer;
       border: none;
+      transition: transform 0.15s ease, filter 0.15s ease;
     }
+
+    button:hover { transform: translateY(-2px); filter: brightness(1.1); }
+    button:active { transform: translateY(1px); }
 
     .container {
-      max-width: 1100px;
+      max-width: 1180px;
       margin: 0 auto;
-      padding: 2rem 1.5rem 4rem;
+      padding: 1.2rem 1.2rem 4rem;
+      position: relative;
+      z-index: 1;
     }
 
-    .settings-btn {
-      position: fixed;
-      top: 20px;
-      right: 24px;
-      font-size: 1.7rem;
-      background: rgba(24, 24, 27, 0.85);
+    .top-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.7rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .pill-btn {
+      font-size: 1.45rem;
+      background: rgba(24,24,27,0.86);
       border: 2px solid var(--main);
       border-radius: 999px;
-      padding: 0.5rem 1rem;
+      padding: 0.45rem 0.95rem;
       color: var(--main);
-      z-index: 100;
-      box-shadow: 0 0 25px rgba(16, 185, 129, 0.2);
+      box-shadow: 0 0 25px color-mix(in srgb, var(--main) 20%, transparent);
     }
 
     .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      display: grid;
+      grid-template-columns: 1fr auto;
       gap: 1rem;
-      margin-bottom: 2rem;
-      padding-bottom: 1.5rem;
+      align-items: end;
+      margin-bottom: 1.4rem;
+      padding-bottom: 1.2rem;
       border-bottom: 2px solid #27272a;
     }
 
@@ -76,68 +111,101 @@
     }
 
     .bolt {
-      width: 70px;
-      height: 70px;
-      background: var(--main);
+      width: 76px;
+      height: 76px;
+      background: linear-gradient(135deg, var(--main), var(--accent));
       color: #050505;
-      border-radius: 16px;
+      border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 3rem;
-      box-shadow: 0 0 40px var(--main);
+      font-size: 3.2rem;
+      box-shadow: 0 0 45px color-mix(in srgb, var(--main) 70%, transparent);
+      animation: floatBolt 2.4s ease-in-out infinite;
+    }
+
+    @keyframes floatBolt {
+      0%,100% { transform: translateY(0) rotate(-2deg); }
+      50% { transform: translateY(-7px) rotate(2deg); }
     }
 
     h1 {
-      font-size: clamp(3rem, 8vw, 4.8rem);
+      font-size: clamp(3rem, 8vw, 5.4rem);
       margin: 0;
       font-weight: bold;
       letter-spacing: 6px;
       color: var(--main);
-      text-shadow: 0 0 25px rgba(16, 185, 129, 0.35);
+      text-shadow: 0 0 26px color-mix(in srgb, var(--main) 36%, transparent);
+      line-height: 0.92;
     }
 
     .subtitle {
-      font-size: 1.6rem;
+      font-size: 1.55rem;
       color: var(--muted);
-      margin: 0.2rem 0 0;
+      margin: 0.45rem 0 0;
+    }
+
+    .rank-card {
+      text-align: right;
+      font-size: 1.4rem;
+      color: var(--muted);
+    }
+
+    .rank-card strong {
+      display: block;
+      color: var(--gold);
+      font-size: 2.8rem;
+      line-height: 0.9;
     }
 
     .panel {
-      background: rgba(24, 24, 27, 0.94);
+      background: var(--card);
       border-radius: 24px;
-      box-shadow: 0 20px 70px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 20px 70px rgba(0,0,0,0.38);
+      backdrop-filter: blur(10px);
     }
 
     .meter-card {
       border: 4px solid var(--main);
-      padding: 2rem;
-      margin-bottom: 1.5rem;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      position: relative;
+      overflow: hidden;
     }
+
+    .meter-card::after {
+      content: "";
+      position: absolute;
+      inset: -60px;
+      background: conic-gradient(from 90deg, transparent, color-mix(in srgb, var(--main) 18%, transparent), transparent, color-mix(in srgb, var(--accent) 14%, transparent), transparent);
+      opacity: 0.55;
+      animation: spinGlow 8s linear infinite;
+      pointer-events: none;
+    }
+
+    .meter-card > * { position: relative; z-index: 1; }
+
+    @keyframes spinGlow { to { transform: rotate(360deg); } }
 
     .meter-top {
       display: flex;
       justify-content: space-between;
       gap: 1rem;
       margin-bottom: 1rem;
-      font-size: 1.8rem;
+      font-size: 1.75rem;
       flex-wrap: wrap;
     }
 
-    .meter-label {
-      color: var(--main);
-    }
+    .meter-label { color: var(--main); }
 
     .meter-stats {
       display: flex;
-      gap: 1.2rem;
+      gap: 1.1rem;
       align-items: baseline;
       flex-wrap: wrap;
     }
 
-    #effective-units {
-      color: var(--gold);
-    }
+    #effective-units { color: var(--gold); }
 
     #progress-percent {
       font-size: 2.5rem;
@@ -157,44 +225,111 @@
     #meter-fill {
       height: 100%;
       width: 0%;
-      background: linear-gradient(to right, var(--main), var(--accent));
-      transition: width 0.35s ease;
-      box-shadow: 0 0 30px var(--main);
+      background: linear-gradient(90deg, var(--main), var(--accent), var(--gold));
+      transition: width 0.28s ease;
+      box-shadow: 0 0 35px var(--main);
+      position: relative;
+    }
+
+    #meter-fill::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent, rgba(255,255,255,0.42), transparent);
+      transform: translateX(-100%);
+      animation: shine 1.2s linear infinite;
+    }
+
+    @keyframes shine { to { transform: translateX(100%); } }
+
+    .overdrive-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .overdrive-shell {
+      height: 18px;
+      border: 1px solid #3f3f46;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #09090b;
+    }
+
+    #overdrive-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--purple), var(--gold));
+      transition: width 0.2s ease;
+    }
+
+    #overdrive-label {
+      color: var(--gold);
+      font-size: 1.5rem;
     }
 
     .stat-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-      margin-bottom: 1.5rem;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.85rem;
+      margin-bottom: 1rem;
     }
 
     .stat-box {
       border: 2px solid #27272a;
-      padding: 1rem;
+      padding: 0.8rem;
       text-align: center;
+      min-height: 104px;
     }
 
     .stat-label {
       color: var(--muted);
-      font-size: 1.3rem;
+      font-size: 1.18rem;
       letter-spacing: 1px;
     }
 
     .stat-value {
-      font-size: 2.6rem;
+      font-size: 2.3rem;
       color: var(--main);
       margin-top: 0.25rem;
+      white-space: nowrap;
+    }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: 1fr 290px;
+      gap: 1rem;
     }
 
     .typing-card {
       border: 2px solid #3f3f46;
-      padding: 2.5rem;
+      padding: 2.2rem;
+      min-height: 430px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .typing-card.flash-good { animation: goodFlash 0.22s ease; }
+    .typing-card.flash-bad { animation: badFlash 0.22s ease; }
+
+    @keyframes goodFlash { 50% { border-color: var(--main); box-shadow: 0 0 30px color-mix(in srgb, var(--main) 35%, transparent); } }
+    @keyframes badFlash { 50% { border-color: var(--danger); box-shadow: 0 0 30px rgba(239,68,68,0.35); } }
+
+    .mode-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 1.35rem;
+      margin-bottom: 1.2rem;
     }
 
     #sentence-display {
       min-height: 230px;
-      font-size: clamp(2rem, 5vw, 2.75rem);
+      font-size: clamp(2rem, 5vw, 2.72rem);
       line-height: 1.45;
       letter-spacing: 2px;
       white-space: pre-wrap;
@@ -210,13 +345,14 @@
     }
 
     .char.current {
-      background: rgba(255, 255, 255, 0.12);
+      background: rgba(255,255,255,0.14);
       outline: 2px solid var(--accent);
+      box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 35%, transparent);
     }
 
     .correct {
       color: var(--main) !important;
-      background: rgba(16, 185, 129, 0.25);
+      background: color-mix(in srgb, var(--main) 24%, transparent);
     }
 
     .incorrect {
@@ -226,35 +362,105 @@
     }
 
     @keyframes shake {
-      0%, 100% { transform: translateX(0); }
+      0%,100% { transform: translateX(0); }
       25% { transform: translateX(-5px); }
       75% { transform: translateX(5px); }
     }
 
     .typing-footer {
-      margin-top: 2rem;
+      margin-top: 1.8rem;
       display: flex;
       justify-content: space-between;
       gap: 1rem;
-      font-size: 1.5rem;
+      font-size: 1.45rem;
       color: var(--muted);
       flex-wrap: wrap;
     }
 
-    .strong {
-      color: var(--main);
-      font-weight: bold;
+    .strong { color: var(--main); font-weight: bold; }
+    .gold { color: var(--gold); }
+    .danger { color: var(--danger); }
+
+    .side-card {
+      border: 2px solid #27272a;
+      padding: 1rem;
+      align-self: start;
     }
 
-    .gold {
-      color: var(--gold);
+    .side-card h3 {
+      margin: 0 0 0.8rem;
+      color: var(--main);
+      font-size: 2rem;
+    }
+
+    .mission {
+      border: 1px solid #3f3f46;
+      border-radius: 16px;
+      padding: 0.75rem;
+      margin-bottom: 0.65rem;
+      font-size: 1.22rem;
+      color: var(--muted);
+    }
+
+    .mission.done {
+      color: var(--main);
+      border-color: var(--main);
+      background: color-mix(in srgb, var(--main) 11%, transparent);
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
+    .badge {
+      border: 1px solid #3f3f46;
+      color: var(--muted);
+      padding: 0.35rem 0.6rem;
+      border-radius: 999px;
+      font-size: 1.05rem;
+    }
+
+    .badge.unlocked {
+      color: #050505;
+      background: var(--gold);
+      border-color: var(--gold);
+    }
+
+    .toast-wrap {
+      position: fixed;
+      top: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: grid;
+      gap: 0.5rem;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: rgba(24,24,27,0.96);
+      border: 2px solid var(--main);
+      color: white;
+      padding: 0.65rem 1rem;
+      border-radius: 999px;
+      font-size: 1.35rem;
+      box-shadow: 0 0 28px rgba(0,0,0,0.45);
+      animation: toastIn 1.6s ease forwards;
+    }
+
+    @keyframes toastIn {
+      0% { transform: translateY(-16px); opacity: 0; }
+      12%,80% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(-12px); opacity: 0; }
     }
 
     .modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.92);
+      background: rgba(0,0,0,0.92);
       align-items: center;
       justify-content: center;
       z-index: 200;
@@ -265,35 +471,60 @@
       background: #18181b;
       border: 6px solid var(--main);
       border-radius: 24px;
-      padding: 2.5rem;
-      width: 90%;
-      max-width: 720px;
+      padding: 2.2rem;
+      width: 92%;
+      max-width: 760px;
+      max-height: 92vh;
+      overflow: auto;
     }
 
     .modal-card h2 {
       font-size: 3.5rem;
       text-align: center;
-      margin: 0 0 1.5rem;
+      margin: 0 0 1.25rem;
       color: var(--main);
     }
 
     .theme-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
+      grid-template-columns: repeat(2,1fr);
+      gap: 0.85rem;
     }
 
-    .theme-grid button,
-    .close-btn,
-    .win-btn,
-    .reset-btn {
-      padding: 1.3rem;
-      font-size: 1.8rem;
+    .theme-grid button, .close-btn, .win-btn, .reset-btn, .danger-btn {
+      padding: 1.15rem;
+      font-size: 1.65rem;
       border-radius: 16px;
     }
 
-    .close-btn,
-    .reset-btn {
+    .settings-row {
+      display: grid;
+      grid-template-columns: repeat(2,1fr);
+      gap: 0.85rem;
+      margin: 1rem 0;
+    }
+
+    .setting-field {
+      background: #09090b;
+      border: 1px solid #3f3f46;
+      border-radius: 16px;
+      padding: 0.9rem;
+      color: var(--muted);
+      font-size: 1.25rem;
+    }
+
+    .setting-field select {
+      width: 100%;
+      margin-top: 0.35rem;
+      font-size: 1.45rem;
+      background: #18181b;
+      color: white;
+      border: 1px solid #3f3f46;
+      border-radius: 10px;
+      padding: 0.55rem;
+    }
+
+    .close-btn, .reset-btn {
       margin-top: 1rem;
       width: 100%;
       background: #27272a;
@@ -301,72 +532,87 @@
       border: 2px solid #3f3f46;
     }
 
+    .danger-btn {
+      margin-top: 0.75rem;
+      width: 100%;
+      background: var(--danger);
+      color: white;
+    }
+
     .win-card {
-      max-width: 520px;
+      max-width: 560px;
       text-align: center;
     }
 
     .trophy {
       font-size: 6rem;
-      margin-bottom: 1rem;
+      margin-bottom: 0.8rem;
     }
 
     .win-btn {
       width: 100%;
       background: var(--main);
       color: black;
-      border-radius: 9999px;
-      margin-top: 1.5rem;
+      border-radius: 999px;
+      margin-top: 1.2rem;
     }
 
-    @media (max-width: 760px) {
-      .header,
-      .brand {
-        align-items: flex-start;
-      }
+    .confetti-piece {
+      position: fixed;
+      top: -20px;
+      width: 10px;
+      height: 16px;
+      background: var(--main);
+      z-index: 9998;
+      animation: confettiFall 1.8s linear forwards;
+    }
 
-      .brand {
-        flex-direction: column;
-      }
+    @keyframes confettiFall {
+      to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
 
-      .settings-btn {
-        position: static;
-        margin: 1rem 1rem 0 auto;
-        display: block;
-      }
+    @media (max-width: 980px) {
+      .stat-grid { grid-template-columns: repeat(3,1fr); }
+      .game-grid { grid-template-columns: 1fr; }
+    }
 
-      .stat-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .typing-card,
-      .meter-card {
-        padding: 1.4rem;
-      }
-
-      .theme-grid {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 680px) {
+      .header { grid-template-columns: 1fr; }
+      .brand { flex-direction: column; align-items: flex-start; }
+      .rank-card { text-align: left; }
+      .stat-grid { grid-template-columns: repeat(2,1fr); }
+      .settings-row, .theme-grid { grid-template-columns: 1fr; }
+      .typing-card, .meter-card { padding: 1.25rem; }
     }
   </style>
 </head>
 <body>
-  <button type="button" onclick="toggleSettings()" class="settings-btn">⚙️ SETTINGS</button>
+  <div class="toast-wrap" id="toast-wrap"></div>
 
   <main class="container">
+    <div class="top-actions">
+      <button type="button" onclick="toggleSound()" class="pill-btn" id="sound-btn">🔊 SOUND</button>
+      <button type="button" onclick="toggleSettings()" class="pill-btn">⚙️ SETTINGS</button>
+    </div>
+
     <header class="header">
       <div class="brand">
         <div class="bolt">⚡</div>
         <div>
           <h1>NITRO METER</h1>
-          <p class="subtitle">type sentences • fill the meter • build speed</p>
+          <p class="subtitle">OVERDRIVE EDITION • type clean • stack combo • fill the tank</p>
         </div>
+      </div>
+      <div class="rank-card">
+        CURRENT RANK
+        <strong id="rank-title">ROOKIE</strong>
+        <span id="rank-flavor">Warm up the engine.</span>
       </div>
     </header>
 
     <section class="panel meter-card" aria-label="Nitro meter progress">
       <div class="meter-top">
-        <div class="meter-label">METER LEVEL</div>
+        <div class="meter-label">NITRO METER</div>
         <div class="meter-stats">
           <div id="sentences-typed">0 sentences</div>
           <div id="effective-units">0.0 effective</div>
@@ -377,6 +623,13 @@
         <div id="meter-fill"></div>
       </div>
     </section>
+
+    <div class="overdrive-row">
+      <div class="overdrive-shell">
+        <div id="overdrive-fill"></div>
+      </div>
+      <div id="overdrive-label">OVERDRIVE 0%</div>
+    </div>
 
     <section class="stat-grid" aria-label="Typing stats">
       <div class="panel stat-box">
@@ -392,25 +645,47 @@
         <div id="accuracy" class="stat-value">100%</div>
       </div>
       <div class="panel stat-box">
+        <div class="stat-label">COMBO</div>
+        <div id="combo-value" class="stat-value">0x</div>
+      </div>
+      <div class="panel stat-box">
         <div class="stat-label">TIER</div>
         <div id="tier-name" class="stat-value">ROOKIE</div>
       </div>
+      <div class="panel stat-box">
+        <div class="stat-label">HIGH SCORE</div>
+        <div id="high-score" class="stat-value">0</div>
+      </div>
     </section>
 
-    <section class="panel typing-card" aria-label="Typing area">
-      <div id="sentence-display"></div>
+    <section class="game-grid">
+      <div class="panel typing-card" id="typing-card" aria-label="Typing area">
+        <div class="mode-line">
+          <div>Mode: <span class="strong" id="mode-name">Classic</span></div>
+          <div>Sentence Bonus: <span class="gold" id="bonus-label">Clean typing earns boost</span></div>
+        </div>
 
-      <div class="typing-footer">
-        <div id="status-text" class="gold">Waiting for first keystroke...</div>
-        <div>Backspace fixes mistakes</div>
-        <div>Press <span class="strong">Esc</span> to pause settings</div>
+        <div id="sentence-display"></div>
+
+        <div class="typing-footer">
+          <div id="status-text" class="gold">Waiting for first keystroke...</div>
+          <div>Backspace fixes mistakes</div>
+          <div><span class="strong">Esc</span> pause/settings</div>
+        </div>
       </div>
+
+      <aside class="panel side-card">
+        <h3>MISSIONS</h3>
+        <div id="missions"></div>
+        <h3 style="margin-top:1rem;">BADGES</h3>
+        <div class="badge-row" id="badges"></div>
+      </aside>
     </section>
   </main>
 
   <div id="settings-modal" class="modal" role="dialog" aria-modal="true" aria-label="Settings">
     <div class="modal-card">
-      <h2>SETTINGS</h2>
+      <h2>GARAGE</h2>
 
       <div class="theme-grid">
         <button type="button" onclick="changeTheme(0)" style="background:#10b981; color:black;">Emerald</button>
@@ -418,10 +693,34 @@
         <button type="button" onclick="changeTheme(2)" style="background:#f97316; color:black;">Orange Fire</button>
         <button type="button" onclick="changeTheme(3)" style="background:#3b82f6; color:white;">Ice Blue</button>
         <button type="button" onclick="changeTheme(4)" style="background:#ec4899; color:white;">Hot Pink</button>
+        <button type="button" onclick="changeTheme(5)" style="background:#facc15; color:black;">Gold Rush</button>
       </div>
 
-      <button type="button" onclick="resetGame()" class="reset-btn">RESET RUN</button>
-      <button type="button" onclick="toggleSettings()" class="close-btn">CLOSE</button>
+      <div class="settings-row">
+        <label class="setting-field">
+          Difficulty
+          <select id="difficulty-select" onchange="setDifficulty(this.value)">
+            <option value="classic">Classic</option>
+            <option value="easy">Easy Cruise</option>
+            <option value="hard">Hard Shift</option>
+            <option value="chaos">Chaos Mode</option>
+          </select>
+        </label>
+
+        <label class="setting-field">
+          Sentence Pack
+          <select id="pack-select" onchange="setPack(this.value)">
+            <option value="mixed">Mixed</option>
+            <option value="gamer">Gamer</option>
+            <option value="focus">Focus</option>
+            <option value="sales">Sales Mode</option>
+          </select>
+        </label>
+      </div>
+
+      <button type="button" onclick="resetGame(); toggleSettings(false);" class="reset-btn">RESET RUN</button>
+      <button type="button" onclick="hardResetSave()" class="danger-btn">CLEAR SAVED HIGH SCORE</button>
+      <button type="button" onclick="toggleSettings(false)" class="close-btn">CLOSE</button>
     </div>
   </div>
 
@@ -429,8 +728,9 @@
     <div class="modal-card win-card">
       <div class="trophy">🏆</div>
       <h2>METER FILLED!</h2>
-      <div id="win-text" style="font-size:2rem; margin:1.5rem 0;"></div>
+      <div id="win-text" style="font-size:2rem; margin:1.2rem 0;"></div>
       <button type="button" onclick="hideWinModal(); resetGame()" class="win-btn">START NEW RUN</button>
+      <button type="button" onclick="hideWinModal()" class="close-btn">KEEP LOOKING</button>
     </div>
   </div>
 
@@ -441,43 +741,70 @@
       { main: '#a855f7', accent: '#c084fc' },
       { main: '#f97316', accent: '#fb923c' },
       { main: '#3b82f6', accent: '#60a5fa' },
-      { main: '#ec4899', accent: '#f472b6' }
+      { main: '#ec4899', accent: '#f472b6' },
+      { main: '#facc15', accent: '#fb923c' }
     ];
 
-    function changeTheme(n) {
-      const theme = themes[n] || themes[0];
-      document.documentElement.style.setProperty('--main', theme.main);
-      document.documentElement.style.setProperty('--accent', theme.accent);
-      localStorage.setItem('nitroTheme', String(n));
-      toggleSettings(false);
-    }
+    const sentencePacks = {
+      mixed: [
+        'The quick brown fox jumps over the lazy dog.',
+        'Typing is a valuable skill in the modern world.',
+        'Practice makes perfect when it comes to typing.',
+        'She sells seashells by the seashore.',
+        'A journey of a thousand miles begins with one step.',
+        'To be or not to be, that is the question.',
+        "What time is it? It's time to type faster!",
+        'Success is not final, failure is not fatal.',
+        'Small wins stack up when you refuse to quit.',
+        'Focus, breathe, type, and keep the rhythm alive.'
+      ],
+      gamer: [
+        'The final boss is easier when your combo is clean.',
+        'Dash left, counter fast, and never waste your ultimate.',
+        'The squad landed hot and still walked away with the crown.',
+        'Every perfect sentence charges the overdrive core.',
+        'Speed is good, accuracy is better, rhythm wins games.',
+        'One clean run can turn a rookie into a legend.'
+      ],
+      focus: [
+        'Discipline is built one quiet rep at a time.',
+        'The strongest version of you keeps promises in private.',
+        'Deep focus turns ordinary effort into rare results.',
+        'Calm hands, clear mind, steady pace, better outcome.',
+        'Energy follows attention, so aim it with purpose.',
+        'The future is built in the boring reps nobody sees.'
+      ],
+      sales: [
+        'The best follow up feels helpful, not desperate.',
+        'Leaders remember solutions that protect their people.',
+        'A strong benefit answers a problem before it becomes a crisis.',
+        'Trust is built when the message is clear and the timing is right.',
+        'The right conversation can open the door to a stronger team.',
+        'Good sales is service with a sharper strategy.'
+      ]
+    };
 
-    function toggleSettings(force) {
-      const modal = document.getElementById('settings-modal');
-      const shouldShow = typeof force === 'boolean' ? force : modal.style.display !== 'flex';
-      modal.style.display = shouldShow ? 'flex' : 'none';
-    }
+    const difficultyRules = {
+      easy: { name: 'Easy Cruise', mistakePenalty: 0, creditBoost: 1.2, target: 90 },
+      classic: { name: 'Classic', mistakePenalty: 1, creditBoost: 1, target: 100 },
+      hard: { name: 'Hard Shift', mistakePenalty: 2, creditBoost: 1.15, target: 115 },
+      chaos: { name: 'Chaos Mode', mistakePenalty: 3, creditBoost: 1.35, target: 130 }
+    };
 
-    // ==================== GAME LOGIC ====================
-    const sentences = [
-      'The quick brown fox jumps over the lazy dog.',
-      'Typing is a valuable skill in the modern world.',
-      'Practice makes perfect when it comes to typing.',
-      'The sun sets in the west every evening.',
-      'She sells seashells by the seashore.',
-      'A journey of a thousand miles begins with one step.',
-      'To be or not to be, that is the question.',
-      "What time is it? It's time to type faster!",
-      'Although it was difficult, she succeeded anyway.',
-      'He said, "I cannot believe how fast you are typing!"',
-      "Punctuation, capitals, and numbers: 1, 2, 3 - let's go!",
-      'Success is not final, failure is not fatal.',
-      'In the middle of every difficulty lies opportunity.',
-      'The only way to do great work is to love what you do.',
-      'The future belongs to those who believe in their dreams.',
-      'Small wins stack up when you refuse to quit.',
-      'Focus, breathe, type, and keep the rhythm alive.'
+    const badgeList = [
+      { id: 'first', label: 'First Spark', test: () => sentencesCompleted >= 1 },
+      { id: 'combo25', label: '25 Combo', test: () => maxCombo >= 25 },
+      { id: 'combo50', label: '50 Combo', test: () => maxCombo >= 50 },
+      { id: 'wpm30', label: '30 WPM', test: () => bestWPM >= 30 },
+      { id: 'wpm60', label: '60 WPM', test: () => bestWPM >= 60 },
+      { id: 'clean3', label: 'Clean Triple', test: () => cleanSentenceStreak >= 3 },
+      { id: 'overdrive', label: 'Overdrive', test: () => overdriveActivations >= 1 },
+      { id: 'champ', label: 'Meter Champ', test: () => totalEffective >= getTarget() }
     ];
+
+    let activePack = 'mixed';
+    let difficulty = 'classic';
+    let sentences = sentencePacks[activePack];
 
     let bestWPM = 8;
     let totalCorrectChars = 0;
@@ -490,17 +817,81 @@
     let currentPos = 0;
     let charSpans = [];
     let gameRunning = true;
+    let combo = 0;
+    let maxCombo = 0;
+    let overdrive = 0;
+    let overdriveActiveUntil = 0;
+    let overdriveActivations = 0;
+    let sentenceMistakes = 0;
+    let totalMistakes = 0;
+    let cleanSentenceStreak = 0;
+    let unlockedBadges = new Set(JSON.parse(localStorage.getItem('nitroBadges') || '[]'));
+    let highScore = Number(localStorage.getItem('nitroHighScore') || 0);
+    let soundOn = localStorage.getItem('nitroSound') !== 'off';
 
-    let sentenceDisplay;
-    let meterFill;
-    let liveWPMValue;
-    let avgWPMValue;
-    let tierNameEl;
-    let accuracyEl;
-    let sentencesTypedEl;
-    let effectiveUnitsEl;
-    let progressPercentEl;
-    let statusText;
+    let sentenceDisplay, meterFill, liveWPMValue, avgWPMValue, tierNameEl, accuracyEl;
+    let sentencesTypedEl, effectiveUnitsEl, progressPercentEl, statusText, typingCard;
+    let comboValue, highScoreEl, rankTitle, rankFlavor, overdriveFill, overdriveLabel, modeName, bonusLabel;
+
+    function getTarget() {
+      return difficultyRules[difficulty].target;
+    }
+
+    function changeTheme(n) {
+      const theme = themes[n] || themes[0];
+      document.documentElement.style.setProperty('--main', theme.main);
+      document.documentElement.style.setProperty('--accent', theme.accent);
+      localStorage.setItem('nitroTheme', String(n));
+      toast('Paint job changed.');
+    }
+
+    function toggleSettings(force) {
+      const modal = document.getElementById('settings-modal');
+      const shouldShow = typeof force === 'boolean' ? force : modal.style.display !== 'flex';
+      modal.style.display = shouldShow ? 'flex' : 'none';
+      gameRunning = !shouldShow && document.getElementById('win-modal').style.display !== 'flex';
+      if (shouldShow) statusText.textContent = 'Paused in the garage.';
+      else if (!startTime) statusText.textContent = 'Waiting for first keystroke...';
+    }
+
+    function setDifficulty(value) {
+      difficulty = value;
+      localStorage.setItem('nitroDifficulty', difficulty);
+      resetGame();
+      toast(`${difficultyRules[difficulty].name} loaded.`);
+    }
+
+    function setPack(value) {
+      activePack = value;
+      sentences = sentencePacks[activePack] || sentencePacks.mixed;
+      localStorage.setItem('nitroPack', activePack);
+      resetGame();
+      toast(`${activePack.toUpperCase()} sentence pack loaded.`);
+    }
+
+    function toggleSound() {
+      soundOn = !soundOn;
+      localStorage.setItem('nitroSound', soundOn ? 'on' : 'off');
+      document.getElementById('sound-btn').textContent = soundOn ? '🔊 SOUND' : '🔇 MUTED';
+      if (soundOn) beep(660, 0.04, 'sine');
+    }
+
+    function beep(freq = 440, duration = 0.045, type = 'square', gainValue = 0.025) {
+      if (!soundOn) return;
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.value = gainValue;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch (_) {}
+    }
 
     function getTierCredit(wpm) {
       if (wpm <= 10) return 1;
@@ -518,18 +909,37 @@
       return 'LEGEND';
     }
 
+    function getRankFlavor(rank) {
+      return {
+        ROOKIE: 'Warm up the engine.',
+        SPEEDSTER: 'Now you are moving.',
+        RACER: 'Clean speed is showing.',
+        PRO: 'Pressure looks good on you.',
+        LEGEND: 'The keyboard is smoking.'
+      }[rank] || 'Keep climbing.';
+    }
+
     function shuffleSentenceIndex() {
       let nextIndex = Math.floor(Math.random() * sentences.length);
-      if (sentences.length > 1 && nextIndex === currentSentenceIndex) {
-        nextIndex = (nextIndex + 1) % sentences.length;
-      }
+      if (sentences.length > 1 && nextIndex === currentSentenceIndex) nextIndex = (nextIndex + 1) % sentences.length;
       currentSentenceIndex = nextIndex;
     }
 
+    function chaosText(text) {
+      if (difficulty !== 'chaos') return text;
+      const swaps = ['!', '?', '#', '$', '%'];
+      return text.split('').map((char, index) => {
+        if (/[aeiou]/i.test(char) && index % 11 === 0) return char.toUpperCase();
+        if (char === '.' && Math.random() > 0.5) return swaps[Math.floor(Math.random() * swaps.length)];
+        return char;
+      }).join('');
+    }
+
     function renderSentence() {
-      currentText = sentences[currentSentenceIndex];
+      currentText = chaosText(sentences[currentSentenceIndex]);
       sentenceDisplay.innerHTML = '';
       charSpans = [];
+      sentenceMistakes = 0;
 
       for (const char of currentText) {
         const span = document.createElement('span');
@@ -545,15 +955,14 @@
 
     function markCurrentChar() {
       charSpans.forEach(span => span.classList.remove('current'));
-      if (charSpans[currentPos]) {
-        charSpans[currentPos].classList.add('current');
-      }
+      if (charSpans[currentPos]) charSpans[currentPos].classList.add('current');
     }
 
     function startTimerIfNeeded() {
       if (!startTime) {
         startTime = Date.now();
         statusText.textContent = 'GO GO GO';
+        toast('Run started. Build the combo.');
       }
     }
 
@@ -594,20 +1003,54 @@
         charSpans[currentPos].classList.remove('incorrect');
         charSpans[currentPos].classList.add('correct');
         totalCorrectChars++;
-        currentPos++;
-        statusText.textContent = 'Clean hit.';
+        combo++;
+        maxCombo = Math.max(maxCombo, combo);
+        overdrive = Math.min(100, overdrive + (overdriveActive() ? 1.8 : 1.1));
+        statusText.textContent = combo >= 20 ? 'Combo is heating up.' : 'Clean hit.';
+        flashCard('good');
+        beep(440 + Math.min(combo, 40) * 8, 0.025, 'square', 0.018);
 
+        if (combo > 0 && combo % 25 === 0) {
+          toast(`${combo}x COMBO!`);
+          document.body.classList.add('combo-fire');
+          setTimeout(() => document.body.classList.remove('combo-fire'), 650);
+        }
+
+        if (overdrive >= 100 && !overdriveActive()) activateOverdrive();
+
+        currentPos++;
         if (currentPos >= currentText.length) {
           completeSentence();
           return;
         }
       } else {
         charSpans[currentPos].classList.add('incorrect');
+        totalMistakes++;
+        sentenceMistakes++;
+        combo = Math.max(0, combo - 2 - difficultyRules[difficulty].mistakePenalty);
+        overdrive = Math.max(0, overdrive - 5 - difficultyRules[difficulty].mistakePenalty);
         statusText.textContent = `Expected "${expected === ' ' ? 'space' : expected}".`;
+        flashCard('bad');
+        beep(160, 0.07, 'sawtooth', 0.025);
       }
 
       markCurrentChar();
       updateLiveStats();
+      checkBadges();
+    }
+
+    function overdriveActive() {
+      return Date.now() < overdriveActiveUntil;
+    }
+
+    function activateOverdrive() {
+      overdrive = 0;
+      overdriveActiveUntil = Date.now() + 7000;
+      overdriveActivations++;
+      toast('🔥 OVERDRIVE ACTIVE: 7 SECONDS');
+      confetti(18);
+      beep(880, 0.08, 'triangle', 0.035);
+      setTimeout(() => beep(1100, 0.08, 'triangle', 0.035), 80);
     }
 
     function completeSentence() {
@@ -616,25 +1059,41 @@
       const currentWPM = elapsedMin > 0 ? Math.floor((totalCorrectChars / 5) / elapsedMin) : 0;
 
       bestWPM = Math.max(bestWPM, currentWPM);
-      totalEffective += getTierCredit(bestWPM);
+
+      if (sentenceMistakes === 0) {
+        cleanSentenceStreak++;
+        combo += 5;
+        overdrive = Math.min(100, overdrive + 8);
+        toast('Perfect sentence bonus +5 combo');
+      } else {
+        cleanSentenceStreak = 0;
+      }
+
+      const comboMultiplier = 1 + Math.min(maxCombo, 100) / 200;
+      const overdriveMultiplier = overdriveActive() ? 1.7 : 1;
+      const cleanBonus = sentenceMistakes === 0 ? 1.25 : 1;
+      const credit = getTierCredit(bestWPM) * difficultyRules[difficulty].creditBoost * comboMultiplier * overdriveMultiplier * cleanBonus;
+      totalEffective += credit;
 
       updateProgressStats();
+      updateLiveStats();
+      checkBadges();
 
-      if (totalEffective >= 100) {
+      if (totalEffective >= getTarget()) {
         showWinModal();
         return;
       }
 
       shuffleSentenceIndex();
       renderSentence();
-      statusText.textContent = 'Sentence cleared. Keep going.';
-      updateLiveStats();
+      statusText.textContent = `Sentence cleared. +${credit.toFixed(1)} nitro.`;
     }
 
     function updateProgressStats() {
+      const target = getTarget();
       sentencesTypedEl.textContent = `${sentencesCompleted} sentence${sentencesCompleted === 1 ? '' : 's'}`;
-      effectiveUnitsEl.textContent = `${totalEffective.toFixed(1)} effective`;
-      const percent = Math.min(100, totalEffective);
+      effectiveUnitsEl.textContent = `${totalEffective.toFixed(1)} / ${target} effective`;
+      const percent = Math.min(100, (totalEffective / target) * 100);
       progressPercentEl.textContent = `${percent.toFixed(0)}%`;
       meterFill.style.width = `${percent}%`;
     }
@@ -643,20 +1102,76 @@
       const elapsedMin = startTime ? (Date.now() - startTime) / 60000 : 0;
       const liveWPM = elapsedMin > 0 ? Math.floor((totalCorrectChars / 5) / elapsedMin) : 0;
       const accuracy = totalAttempts > 0 ? Math.round((totalCorrectChars / totalAttempts) * 100) : 100;
+      const rank = getTierName(bestWPM);
+      const score = Math.floor(totalEffective * 100 + bestWPM * 10 + maxCombo * 5 - totalMistakes * 8);
 
       liveWPMValue.textContent = String(liveWPM).padStart(3, '0');
       avgWPMValue.textContent = String(Math.floor(bestWPM)).padStart(3, '0');
       accuracyEl.textContent = `${accuracy}%`;
-      tierNameEl.textContent = getTierName(bestWPM);
+      comboValue.textContent = `${combo}x`;
+      tierNameEl.textContent = rank;
+      rankTitle.textContent = rank;
+      rankFlavor.textContent = getRankFlavor(rank);
+      highScoreEl.textContent = Math.max(highScore, score).toString();
+      overdriveFill.style.width = `${overdrive}%`;
+      overdriveLabel.textContent = overdriveActive()
+        ? `OVERDRIVE ACTIVE ${Math.ceil((overdriveActiveUntil - Date.now()) / 1000)}s`
+        : `OVERDRIVE ${Math.floor(overdrive)}%`;
+      modeName.textContent = difficultyRules[difficulty].name;
+      bonusLabel.textContent = overdriveActive() ? 'Overdrive bonus is live' : 'Clean typing earns boost';
+      renderMissions();
+    }
+
+    function renderMissions() {
+      const missions = [
+        { label: 'Finish 3 sentences', done: sentencesCompleted >= 3 },
+        { label: 'Reach 25x combo', done: maxCombo >= 25 },
+        { label: 'Hit 30 WPM', done: bestWPM >= 30 },
+        { label: 'Activate overdrive', done: overdriveActivations >= 1 }
+      ];
+
+      document.getElementById('missions').innerHTML = missions.map(m => `
+        <div class="mission ${m.done ? 'done' : ''}">${m.done ? '✅' : '⬜'} ${m.label}</div>
+      `).join('');
+    }
+
+    function renderBadges() {
+      document.getElementById('badges').innerHTML = badgeList.map(b => `
+        <span class="badge ${unlockedBadges.has(b.id) ? 'unlocked' : ''}">${b.label}</span>
+      `).join('');
+    }
+
+    function checkBadges() {
+      let changed = false;
+      for (const badge of badgeList) {
+        if (!unlockedBadges.has(badge.id) && badge.test()) {
+          unlockedBadges.add(badge.id);
+          toast(`Badge unlocked: ${badge.label}`);
+          changed = true;
+        }
+      }
+      if (changed) {
+        localStorage.setItem('nitroBadges', JSON.stringify([...unlockedBadges]));
+        renderBadges();
+      }
     }
 
     function showWinModal() {
       gameRunning = false;
+      const score = Math.floor(totalEffective * 100 + bestWPM * 10 + maxCombo * 5 - totalMistakes * 8);
+      const oldHigh = highScore;
+      highScore = Math.max(highScore, score);
+      localStorage.setItem('nitroHighScore', String(highScore));
+      highScoreEl.textContent = String(highScore);
+      checkBadges();
+      confetti(80);
       document.getElementById('win-modal').style.display = 'flex';
       document.getElementById('win-text').innerHTML = `
-        BEST SPEED: <span style="color:var(--main); font-size:2.8rem;">${bestWPM.toFixed(1)} WPM</span><br>
-        TIER: <span style="color:var(--main);">${getTierName(bestWPM)}</span><br>
-        SENTENCES: <span style="color:var(--main);">${sentencesCompleted}</span>
+        SCORE: <span style="color:var(--gold); font-size:2.8rem;">${score}</span><br>
+        BEST SPEED: <span style="color:var(--main);">${bestWPM.toFixed(1)} WPM</span><br>
+        MAX COMBO: <span style="color:var(--main);">${maxCombo}x</span><br>
+        ACCURACY: <span style="color:var(--main);">${totalAttempts ? Math.round((totalCorrectChars / totalAttempts) * 100) : 100}%</span><br>
+        ${score > oldHigh ? '<span style="color:var(--gold);">NEW HIGH SCORE!</span>' : ''}
       `;
     }
 
@@ -674,15 +1189,63 @@
       startTime = null;
       currentSentenceIndex = 0;
       gameRunning = true;
+      combo = 0;
+      maxCombo = 0;
+      overdrive = 0;
+      overdriveActiveUntil = 0;
+      overdriveActivations = 0;
+      sentenceMistakes = 0;
+      totalMistakes = 0;
+      cleanSentenceStreak = 0;
 
       meterFill.style.width = '0%';
       sentencesTypedEl.textContent = '0 sentences';
-      effectiveUnitsEl.textContent = '0.0 effective';
+      effectiveUnitsEl.textContent = `0.0 / ${getTarget()} effective`;
       progressPercentEl.textContent = '0%';
       statusText.textContent = 'Waiting for first keystroke...';
 
       renderSentence();
       updateLiveStats();
+      renderMissions();
+      renderBadges();
+    }
+
+    function hardResetSave() {
+      highScore = 0;
+      unlockedBadges = new Set();
+      localStorage.removeItem('nitroHighScore');
+      localStorage.removeItem('nitroBadges');
+      highScoreEl.textContent = '0';
+      renderBadges();
+      toast('Saved score cleared.');
+    }
+
+    function flashCard(type) {
+      typingCard.classList.remove('flash-good', 'flash-bad');
+      void typingCard.offsetWidth;
+      typingCard.classList.add(type === 'good' ? 'flash-good' : 'flash-bad');
+    }
+
+    function toast(message) {
+      const wrap = document.getElementById('toast-wrap');
+      const el = document.createElement('div');
+      el.className = 'toast';
+      el.textContent = message;
+      wrap.appendChild(el);
+      setTimeout(() => el.remove(), 1700);
+    }
+
+    function confetti(count = 30) {
+      for (let i = 0; i < count; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = `${Math.random() * 100}vw`;
+        piece.style.background = [getComputedStyle(document.documentElement).getPropertyValue('--main'), getComputedStyle(document.documentElement).getPropertyValue('--accent'), '#fbbf24', '#ef4444'][Math.floor(Math.random() * 4)];
+        piece.style.animationDelay = `${Math.random() * 0.35}s`;
+        piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 2300);
+      }
     }
 
     function init() {
@@ -696,20 +1259,36 @@
       effectiveUnitsEl = document.getElementById('effective-units');
       progressPercentEl = document.getElementById('progress-percent');
       statusText = document.getElementById('status-text');
+      typingCard = document.getElementById('typing-card');
+      comboValue = document.getElementById('combo-value');
+      highScoreEl = document.getElementById('high-score');
+      rankTitle = document.getElementById('rank-title');
+      rankFlavor = document.getElementById('rank-flavor');
+      overdriveFill = document.getElementById('overdrive-fill');
+      overdriveLabel = document.getElementById('overdrive-label');
+      modeName = document.getElementById('mode-name');
+      bonusLabel = document.getElementById('bonus-label');
 
       const savedTheme = Number(localStorage.getItem('nitroTheme'));
-      if (!Number.isNaN(savedTheme) && themes[savedTheme]) {
-        document.documentElement.style.setProperty('--main', themes[savedTheme].main);
-        document.documentElement.style.setProperty('--accent', themes[savedTheme].accent);
-      }
+      if (!Number.isNaN(savedTheme) && themes[savedTheme]) changeTheme(savedTheme);
+
+      difficulty = localStorage.getItem('nitroDifficulty') || 'classic';
+      activePack = localStorage.getItem('nitroPack') || 'mixed';
+      sentences = sentencePacks[activePack] || sentencePacks.mixed;
+      document.getElementById('difficulty-select').value = difficulty;
+      document.getElementById('pack-select').value = activePack;
+      document.getElementById('sound-btn').textContent = soundOn ? '🔊 SOUND' : '🔇 MUTED';
+      highScoreEl.textContent = String(highScore);
 
       renderSentence();
+      renderMissions();
+      renderBadges();
       updateLiveStats();
       document.addEventListener('keydown', handleKey);
 
       setInterval(() => {
         if (gameRunning && startTime) updateLiveStats();
-      }, 300);
+      }, 250);
     }
 
     window.addEventListener('load', init);

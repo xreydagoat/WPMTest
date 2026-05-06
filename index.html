@@ -1,329 +1,718 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NITRO METER • Type → Fill → Dominate</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NITRO METER • Type → Fill → Dominate</title>
 
-        :root {
-            --main: #10b981;
-            --accent: #67e8f9;
-            --bg: #09090b;
-            --card: #18181b;
-        }
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
-        body {
-            font-family: 'VT323', monospace;
-            background: var(--bg);
-            color: white;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-        }
+    :root {
+      --main: #10b981;
+      --accent: #67e8f9;
+      --bg: #09090b;
+      --card: #18181b;
+      --muted: #a1a1aa;
+      --danger: #ef4444;
+      --gold: #fbbf24;
+    }
 
-        .container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+    * {
+      box-sizing: border-box;
+    }
 
-        .char {
-            transition: all 0.05s ease;
-            padding: 2px 5px;
-            border-radius: 4px;
-            font-size: 2.65rem;
-            line-height: 1.2;
-            display: inline-block;
-        }
+    body {
+      font-family: 'VT323', monospace;
+      background:
+        radial-gradient(circle at top left, rgba(16, 185, 129, 0.14), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(103, 232, 249, 0.1), transparent 40%),
+        var(--bg);
+      color: white;
+      margin: 0;
+      min-height: 100vh;
+    }
 
-        .correct { color: var(--main) !important; background: rgba(16, 185, 129, 0.25); }
-        .incorrect { color: #ef4444 !important; background: rgba(239, 68, 68, 0.35); animation: shake 0.3s; }
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+    }
 
-        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
 
-        #sentence-display {
-            min-height: 280px;
-            font-size: 2.65rem;
-            line-height: 1.45;
-            letter-spacing: 2px;
-            white-space: pre-wrap;
-            word-break: normal;
-            overflow-wrap: normal;
-        }
+    .settings-btn {
+      position: fixed;
+      top: 20px;
+      right: 24px;
+      font-size: 1.7rem;
+      background: rgba(24, 24, 27, 0.85);
+      border: 2px solid var(--main);
+      border-radius: 999px;
+      padding: 0.5rem 1rem;
+      color: var(--main);
+      z-index: 100;
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.2);
+    }
 
-        .settings-btn {
-            position: absolute;
-            top: 25px;
-            right: 30px;
-            font-size: 2.2rem;
-            background: none;
-            border: none;
-            color: var(--main);
-            cursor: pointer;
-            z-index: 100;
-        }
-    </style>
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #27272a;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .bolt {
+      width: 70px;
+      height: 70px;
+      background: var(--main);
+      color: #050505;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      box-shadow: 0 0 40px var(--main);
+    }
+
+    h1 {
+      font-size: clamp(3rem, 8vw, 4.8rem);
+      margin: 0;
+      font-weight: bold;
+      letter-spacing: 6px;
+      color: var(--main);
+      text-shadow: 0 0 25px rgba(16, 185, 129, 0.35);
+    }
+
+    .subtitle {
+      font-size: 1.6rem;
+      color: var(--muted);
+      margin: 0.2rem 0 0;
+    }
+
+    .panel {
+      background: rgba(24, 24, 27, 0.94);
+      border-radius: 24px;
+      box-shadow: 0 20px 70px rgba(0, 0, 0, 0.35);
+    }
+
+    .meter-card {
+      border: 4px solid var(--main);
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .meter-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      font-size: 1.8rem;
+      flex-wrap: wrap;
+    }
+
+    .meter-label {
+      color: var(--main);
+    }
+
+    .meter-stats {
+      display: flex;
+      gap: 1.2rem;
+      align-items: baseline;
+      flex-wrap: wrap;
+    }
+
+    #effective-units {
+      color: var(--gold);
+    }
+
+    #progress-percent {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: white;
+    }
+
+    .meter-shell {
+      height: 52px;
+      background: #09090b;
+      border: 2px solid #3f3f46;
+      border-radius: 9999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #meter-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(to right, var(--main), var(--accent));
+      transition: width 0.35s ease;
+      box-shadow: 0 0 30px var(--main);
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-box {
+      border: 2px solid #27272a;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 1.3rem;
+      letter-spacing: 1px;
+    }
+
+    .stat-value {
+      font-size: 2.6rem;
+      color: var(--main);
+      margin-top: 0.25rem;
+    }
+
+    .typing-card {
+      border: 2px solid #3f3f46;
+      padding: 2.5rem;
+    }
+
+    #sentence-display {
+      min-height: 230px;
+      font-size: clamp(2rem, 5vw, 2.75rem);
+      line-height: 1.45;
+      letter-spacing: 2px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .char {
+      transition: all 0.05s ease;
+      padding: 2px 5px;
+      border-radius: 4px;
+      display: inline-block;
+      position: relative;
+    }
+
+    .char.current {
+      background: rgba(255, 255, 255, 0.12);
+      outline: 2px solid var(--accent);
+    }
+
+    .correct {
+      color: var(--main) !important;
+      background: rgba(16, 185, 129, 0.25);
+    }
+
+    .incorrect {
+      color: var(--danger) !important;
+      background: rgba(239, 68, 68, 0.35);
+      animation: shake 0.25s;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .typing-footer {
+      margin-top: 2rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      font-size: 1.5rem;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+
+    .strong {
+      color: var(--main);
+      font-weight: bold;
+    }
+
+    .gold {
+      color: var(--gold);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.92);
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 1rem;
+    }
+
+    .modal-card {
+      background: #18181b;
+      border: 6px solid var(--main);
+      border-radius: 24px;
+      padding: 2.5rem;
+      width: 90%;
+      max-width: 720px;
+    }
+
+    .modal-card h2 {
+      font-size: 3.5rem;
+      text-align: center;
+      margin: 0 0 1.5rem;
+      color: var(--main);
+    }
+
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .theme-grid button,
+    .close-btn,
+    .win-btn,
+    .reset-btn {
+      padding: 1.3rem;
+      font-size: 1.8rem;
+      border-radius: 16px;
+    }
+
+    .close-btn,
+    .reset-btn {
+      margin-top: 1rem;
+      width: 100%;
+      background: #27272a;
+      color: white;
+      border: 2px solid #3f3f46;
+    }
+
+    .win-card {
+      max-width: 520px;
+      text-align: center;
+    }
+
+    .trophy {
+      font-size: 6rem;
+      margin-bottom: 1rem;
+    }
+
+    .win-btn {
+      width: 100%;
+      background: var(--main);
+      color: black;
+      border-radius: 9999px;
+      margin-top: 1.5rem;
+    }
+
+    @media (max-width: 760px) {
+      .header,
+      .brand {
+        align-items: flex-start;
+      }
+
+      .brand {
+        flex-direction: column;
+      }
+
+      .settings-btn {
+        position: static;
+        margin: 1rem 1rem 0 auto;
+        display: block;
+      }
+
+      .stat-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .typing-card,
+      .meter-card {
+        padding: 1.4rem;
+      }
+
+      .theme-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
-    <button onclick="toggleSettings()" class="settings-btn">⚙️ SETTINGS</button>
+  <button type="button" onclick="toggleSettings()" class="settings-btn">⚙️ SETTINGS</button>
 
-    <div class="container">
-        <!-- HEADER -->
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; padding-bottom:1.5rem; border-bottom:2px solid #27272a;">
-            <div style="display:flex; align-items:center; gap:1rem;">
-                <div style="width:70px; height:70px; background:var(--main); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:3rem; box-shadow:0 0 40px var(--main);">⚡</div>
-                <div>
-                    <h1 style="font-size:3.8rem; font-weight:bold; letter-spacing:6px; color:var(--main);">NITRO METER</h1>
-                    <p style="font-size:1.6rem; color:#a1a1aa;">type sentences • fill the meter • never downgrade</p>
-                </div>
-            </div>
+  <main class="container">
+    <header class="header">
+      <div class="brand">
+        <div class="bolt">⚡</div>
+        <div>
+          <h1>NITRO METER</h1>
+          <p class="subtitle">type sentences • fill the meter • build speed</p>
         </div>
+      </div>
+    </header>
 
-        <!-- METER -->
-        <div style="background:var(--card); border:4px solid var(--main); border-radius:24px; padding:2rem; margin-bottom:3rem;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:1rem; font-size:1.8rem;">
-                <div style="color:var(--main);">METER LEVEL</div>
-                <div style="display:flex; gap:2rem;">
-                    <div id="sentences-typed">0 sentences</div>
-                    <div id="effective-units" style="color:#fbbf24;">0 effective</div>
-                    <div id="progress-percent" style="font-size:2.5rem; font-weight:bold; color:white;">0%</div>
-                </div>
-            </div>
-            <div style="height:52px; background:#09090b; border:2px solid #3f3f46; border-radius:9999px; overflow:hidden;">
-                <div id="meter-fill" style="height:100%; width:0%; background:linear-gradient(to right, var(--main), var(--accent)); transition: width 0.5s;"></div>
-            </div>
+    <section class="panel meter-card" aria-label="Nitro meter progress">
+      <div class="meter-top">
+        <div class="meter-label">METER LEVEL</div>
+        <div class="meter-stats">
+          <div id="sentences-typed">0 sentences</div>
+          <div id="effective-units">0.0 effective</div>
+          <div id="progress-percent">0%</div>
         </div>
+      </div>
+      <div class="meter-shell">
+        <div id="meter-fill"></div>
+      </div>
+    </section>
 
-        <!-- TYPING AREA -->
-        <div style="background:var(--card); border:2px solid #3f3f46; border-radius:24px; padding:3rem;">
-            <div id="sentence-display"></div>
-            
-            <div style="margin-top:2.5rem; display:flex; justify-content:space-between; font-size:1.5rem; color:#a1a1aa;">
-                <div>Accuracy: <span id="accuracy" style="color:var(--main); font-weight:bold;">100%</span></div>
-                <div id="status-text" style="color:#fbbf24;">Waiting for first keystroke...</div>
-                <div>Press any key to begin</div>
-            </div>
-        </div>
+    <section class="stat-grid" aria-label="Typing stats">
+      <div class="panel stat-box">
+        <div class="stat-label">LIVE WPM</div>
+        <div id="live-wpm-value" class="stat-value">000</div>
+      </div>
+      <div class="panel stat-box">
+        <div class="stat-label">BEST WPM</div>
+        <div id="avg-wpm-value" class="stat-value">008</div>
+      </div>
+      <div class="panel stat-box">
+        <div class="stat-label">ACCURACY</div>
+        <div id="accuracy" class="stat-value">100%</div>
+      </div>
+      <div class="panel stat-box">
+        <div class="stat-label">TIER</div>
+        <div id="tier-name" class="stat-value">ROOKIE</div>
+      </div>
+    </section>
+
+    <section class="panel typing-card" aria-label="Typing area">
+      <div id="sentence-display"></div>
+
+      <div class="typing-footer">
+        <div id="status-text" class="gold">Waiting for first keystroke...</div>
+        <div>Backspace fixes mistakes</div>
+        <div>Press <span class="strong">Esc</span> to pause settings</div>
+      </div>
+    </section>
+  </main>
+
+  <div id="settings-modal" class="modal" role="dialog" aria-modal="true" aria-label="Settings">
+    <div class="modal-card">
+      <h2>SETTINGS</h2>
+
+      <div class="theme-grid">
+        <button type="button" onclick="changeTheme(0)" style="background:#10b981; color:black;">Emerald</button>
+        <button type="button" onclick="changeTheme(1)" style="background:#a855f7; color:white;">Purple Neon</button>
+        <button type="button" onclick="changeTheme(2)" style="background:#f97316; color:black;">Orange Fire</button>
+        <button type="button" onclick="changeTheme(3)" style="background:#3b82f6; color:white;">Ice Blue</button>
+        <button type="button" onclick="changeTheme(4)" style="background:#ec4899; color:white;">Hot Pink</button>
+      </div>
+
+      <button type="button" onclick="resetGame()" class="reset-btn">RESET RUN</button>
+      <button type="button" onclick="toggleSettings()" class="close-btn">CLOSE</button>
     </div>
+  </div>
 
-    <!-- SETTINGS MODAL -->
-    <div id="settings-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); align-items:center; justify-content:center; z-index:200;">
-        <div style="background:#18181b; border:6px solid var(--main); border-radius:24px; padding:2.5rem; width:90%; max-width:720px;">
-            <h2 style="font-size:3.5rem; text-align:center; margin-bottom:1.5rem; color:var(--main);">SETTINGS</h2>
-            
-            <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:1rem;">
-                <button onclick="changeTheme(0)" style="background:#10b981; color:black; padding:1.8rem; font-size:2rem; border-radius:16px;">Emerald</button>
-                <button onclick="changeTheme(1)" style="background:#a855f7; color:white; padding:1.8rem; font-size:2rem; border-radius:16px;">Purple Neon</button>
-                <button onclick="changeTheme(2)" style="background:#f97316; color:black; padding:1.8rem; font-size:2rem; border-radius:16px;">Orange Fire</button>
-                <button onclick="changeTheme(3)" style="background:#3b82f6; color:white; padding:1.8rem; font-size:2rem; border-radius:16px;">Ice Blue</button>
-                <button onclick="changeTheme(4)" style="background:#ec4899; color:white; padding:1.8rem; font-size:2rem; border-radius:16px;">Hot Pink</button>
-            </div>
-
-            <button onclick="toggleSettings()" style="margin-top:2rem; width:100%; padding:1.5rem; font-size:2rem; background:#27272a; border:none; border-radius:16px;">CLOSE</button>
-        </div>
+  <div id="win-modal" class="modal" role="dialog" aria-modal="true" aria-label="Win screen">
+    <div class="modal-card win-card">
+      <div class="trophy">🏆</div>
+      <h2>METER FILLED!</h2>
+      <div id="win-text" style="font-size:2rem; margin:1.5rem 0;"></div>
+      <button type="button" onclick="hideWinModal(); resetGame()" class="win-btn">START NEW RUN</button>
     </div>
+  </div>
 
-    <!-- WIN MODAL -->
-    <div id="win-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); align-items:center; justify-content:center; z-index:1000;">
-        <div style="background:#18181b; border:4px solid var(--main); border-radius:24px; max-width:500px; width:90%; padding:3rem; text-align:center;">
-            <div style="font-size:6rem; margin-bottom:1rem;">🏆</div>
-            <h2 style="font-size:3.5rem; color:var(--main);">METER FILLED!</h2>
-            <div id="win-text" style="font-size:2rem; margin:1.5rem 0;"></div>
-            <button onclick="hideWinModal(); resetGame()" 
-                    style="width:100%; padding:1.5rem; font-size:2rem; background:var(--main); color:black; border:none; border-radius:9999px;">
-                START NEW RUN
-            </button>
-        </div>
-    </div>
+  <script>
+    // ==================== THEMES ====================
+    const themes = [
+      { main: '#10b981', accent: '#67e8f9' },
+      { main: '#a855f7', accent: '#c084fc' },
+      { main: '#f97316', accent: '#fb923c' },
+      { main: '#3b82f6', accent: '#60a5fa' },
+      { main: '#ec4899', accent: '#f472b6' }
+    ];
 
-    <script>
-        // ==================== THEMES ====================
-        const themes = [
-            { main: "#10b981", accent: "#67e8f9" },
-            { main: "#a855f7", accent: "#c084fc" },
-            { main: "#f97316", accent: "#fb923c" },
-            { main: "#3b82f6", accent: "#60a5fa" },
-            { main: "#ec4899", accent: "#f472b6" }
-        ];
+    function changeTheme(n) {
+      const theme = themes[n] || themes[0];
+      document.documentElement.style.setProperty('--main', theme.main);
+      document.documentElement.style.setProperty('--accent', theme.accent);
+      localStorage.setItem('nitroTheme', String(n));
+      toggleSettings(false);
+    }
 
-        function changeTheme(n) {
-            document.documentElement.style.setProperty('--main', themes[n].main);
-            document.documentElement.style.setProperty('--accent', themes[n].accent);
-            toggleSettings();
+    function toggleSettings(force) {
+      const modal = document.getElementById('settings-modal');
+      const shouldShow = typeof force === 'boolean' ? force : modal.style.display !== 'flex';
+      modal.style.display = shouldShow ? 'flex' : 'none';
+    }
+
+    // ==================== GAME LOGIC ====================
+    const sentences = [
+      'The quick brown fox jumps over the lazy dog.',
+      'Typing is a valuable skill in the modern world.',
+      'Practice makes perfect when it comes to typing.',
+      'The sun sets in the west every evening.',
+      'She sells seashells by the seashore.',
+      'A journey of a thousand miles begins with one step.',
+      'To be or not to be, that is the question.',
+      "What time is it? It's time to type faster!",
+      'Although it was difficult, she succeeded anyway.',
+      'He said, "I cannot believe how fast you are typing!"',
+      "Punctuation, capitals, and numbers: 1, 2, 3 - let's go!",
+      'Success is not final, failure is not fatal.',
+      'In the middle of every difficulty lies opportunity.',
+      'The only way to do great work is to love what you do.',
+      'The future belongs to those who believe in their dreams.',
+      'Small wins stack up when you refuse to quit.',
+      'Focus, breathe, type, and keep the rhythm alive.'
+    ];
+
+    let bestWPM = 8;
+    let totalCorrectChars = 0;
+    let totalAttempts = 0;
+    let totalEffective = 0;
+    let sentencesCompleted = 0;
+    let startTime = null;
+    let currentSentenceIndex = 0;
+    let currentText = '';
+    let currentPos = 0;
+    let charSpans = [];
+    let gameRunning = true;
+
+    let sentenceDisplay;
+    let meterFill;
+    let liveWPMValue;
+    let avgWPMValue;
+    let tierNameEl;
+    let accuracyEl;
+    let sentencesTypedEl;
+    let effectiveUnitsEl;
+    let progressPercentEl;
+    let statusText;
+
+    function getTierCredit(wpm) {
+      if (wpm <= 10) return 1;
+      if (wpm <= 30) return 3.5;
+      if (wpm <= 60) return 7;
+      if (wpm <= 90) return 11.5;
+      return 16;
+    }
+
+    function getTierName(wpm) {
+      if (wpm <= 10) return 'ROOKIE';
+      if (wpm <= 30) return 'SPEEDSTER';
+      if (wpm <= 60) return 'RACER';
+      if (wpm <= 90) return 'PRO';
+      return 'LEGEND';
+    }
+
+    function shuffleSentenceIndex() {
+      let nextIndex = Math.floor(Math.random() * sentences.length);
+      if (sentences.length > 1 && nextIndex === currentSentenceIndex) {
+        nextIndex = (nextIndex + 1) % sentences.length;
+      }
+      currentSentenceIndex = nextIndex;
+    }
+
+    function renderSentence() {
+      currentText = sentences[currentSentenceIndex];
+      sentenceDisplay.innerHTML = '';
+      charSpans = [];
+
+      for (const char of currentText) {
+        const span = document.createElement('span');
+        span.className = 'char';
+        span.textContent = char === ' ' ? '\u00A0' : char;
+        sentenceDisplay.appendChild(span);
+        charSpans.push(span);
+      }
+
+      currentPos = 0;
+      markCurrentChar();
+    }
+
+    function markCurrentChar() {
+      charSpans.forEach(span => span.classList.remove('current'));
+      if (charSpans[currentPos]) {
+        charSpans[currentPos].classList.add('current');
+      }
+    }
+
+    function startTimerIfNeeded() {
+      if (!startTime) {
+        startTime = Date.now();
+        statusText.textContent = 'GO GO GO';
+      }
+    }
+
+    function handleKey(e) {
+      if (e.key === 'Escape') {
+        toggleSettings();
+        return;
+      }
+
+      if (!gameRunning || document.getElementById('settings-modal').style.display === 'flex') return;
+
+      const ignoredKeys = ['Shift', 'CapsLock', 'Control', 'Alt', 'Meta', 'Tab', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+      if (ignoredKeys.includes(e.key)) return;
+
+      if (e.key === 'Backspace') {
+        e.preventDefault();
+        if (currentPos > 0) {
+          currentPos--;
+          charSpans[currentPos].classList.remove('correct', 'incorrect');
+          statusText.textContent = 'Mistake corrected.';
+          markCurrentChar();
+          updateLiveStats();
         }
+        return;
+      }
 
-        function toggleSettings() {
-            const modal = document.getElementById('settings-modal');
-            modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+      if (e.key.length !== 1 && e.key !== ' ') return;
+
+      e.preventDefault();
+      startTimerIfNeeded();
+
+      const expected = currentText[currentPos];
+      if (!expected) return;
+
+      totalAttempts++;
+
+      if (e.key === expected) {
+        charSpans[currentPos].classList.remove('incorrect');
+        charSpans[currentPos].classList.add('correct');
+        totalCorrectChars++;
+        currentPos++;
+        statusText.textContent = 'Clean hit.';
+
+        if (currentPos >= currentText.length) {
+          completeSentence();
+          return;
         }
+      } else {
+        charSpans[currentPos].classList.add('incorrect');
+        statusText.textContent = `Expected "${expected === ' ' ? 'space' : expected}".`;
+      }
 
-        // ==================== GAME LOGIC ====================
-        const sentences = [
-            "The quick brown fox jumps over the lazy dog.",
-            "Typing is a valuable skill in the modern world.",
-            "Practice makes perfect when it comes to typing.",
-            "The sun sets in the west every evening.",
-            "She sells seashells by the seashore.",
-            "A journey of a thousand miles begins with one step.",
-            "To be or not to be, that is the question.",
-            "What time is it? It's time to type faster!",
-            "Although it was difficult, she succeeded anyway.",
-            "He said, \"I can't believe how fast you're typing!\"",
-            "Punctuation, capitals, and numbers: 1, 2, 3 – let's go!",
-            "Success is not final, failure is not fatal.",
-            "In the middle of every difficulty lies opportunity.",
-            "The only way to do great work is to love what you do.",
-            "The future belongs to those who believe in the beauty of their dreams."
-        ];
+      markCurrentChar();
+      updateLiveStats();
+    }
 
-        let maxAverageWPM = 8;
-        let totalCorrectChars = 0;
-        let totalAttempts = 0;
-        let totalEffective = 0;
-        let sentencesCompleted = 0;
-        let startTime = null;
-        let currentSentenceIndex = 0;
-        let currentText = "";
-        let currentPos = 0;
-        let charSpans = [];
-        let gameRunning = true;
+    function completeSentence() {
+      sentencesCompleted++;
+      const elapsedMin = (Date.now() - startTime) / 60000;
+      const currentWPM = elapsedMin > 0 ? Math.floor((totalCorrectChars / 5) / elapsedMin) : 0;
 
-        let sentenceDisplay, meterFill, liveWPMValue, avgWPMValue, tierNameEl, accuracyEl, sentencesTypedEl, effectiveUnitsEl, progressPercentEl, statusText;
+      bestWPM = Math.max(bestWPM, currentWPM);
+      totalEffective += getTierCredit(bestWPM);
 
-        function getTierCredit(wpm) {
-            if (wpm <= 10) return 1;
-            if (wpm <= 30) return 3.5;
-            if (wpm <= 60) return 7;
-            if (wpm <= 90) return 11.5;
-            return 16;
-        }
+      updateProgressStats();
 
-        function getTierName(wpm) {
-            if (wpm <= 10) return "ROOKIE";
-            if (wpm <= 30) return "SPEEDSTER";
-            if (wpm <= 60) return "RACER";
-            if (wpm <= 90) return "PRO";
-            return "LEGEND";
-        }
+      if (totalEffective >= 100) {
+        showWinModal();
+        return;
+      }
 
-        function renderSentence() {
-            currentText = sentences[currentSentenceIndex];
-            sentenceDisplay.innerHTML = "";
-            charSpans = [];
+      shuffleSentenceIndex();
+      renderSentence();
+      statusText.textContent = 'Sentence cleared. Keep going.';
+      updateLiveStats();
+    }
 
-            for (let char of currentText) {
-                const span = document.createElement('span');
-                span.className = "char";
-                span.textContent = char === " " ? "\u00A0" : char;
-                sentenceDisplay.appendChild(span);
-                charSpans.push(span);
-            }
-            currentPos = 0;
-        }
+    function updateProgressStats() {
+      sentencesTypedEl.textContent = `${sentencesCompleted} sentence${sentencesCompleted === 1 ? '' : 's'}`;
+      effectiveUnitsEl.textContent = `${totalEffective.toFixed(1)} effective`;
+      const percent = Math.min(100, totalEffective);
+      progressPercentEl.textContent = `${percent.toFixed(0)}%`;
+      meterFill.style.width = `${percent}%`;
+    }
 
-        function handleKey(e) {
-            if (!gameRunning) return;
-            if (!startTime) {
-                startTime = Date.now();
-                statusText.textContent = "GO GO GO";
-            }
-            if (["Shift","CapsLock","Control","Alt"].includes(e.key)) return;
+    function updateLiveStats() {
+      const elapsedMin = startTime ? (Date.now() - startTime) / 60000 : 0;
+      const liveWPM = elapsedMin > 0 ? Math.floor((totalCorrectChars / 5) / elapsedMin) : 0;
+      const accuracy = totalAttempts > 0 ? Math.round((totalCorrectChars / totalAttempts) * 100) : 100;
 
-            totalAttempts++;
-            const expected = currentText[currentPos];
+      liveWPMValue.textContent = String(liveWPM).padStart(3, '0');
+      avgWPMValue.textContent = String(Math.floor(bestWPM)).padStart(3, '0');
+      accuracyEl.textContent = `${accuracy}%`;
+      tierNameEl.textContent = getTierName(bestWPM);
+    }
 
-            if (e.key === expected) {
-                charSpans[currentPos].classList.remove('incorrect');
-                charSpans[currentPos].classList.add('correct');
-                totalCorrectChars++;
-                currentPos++;
-                if (currentPos >= currentText.length) completeSentence();
-            } else if (e.key.length === 1 || e.key === " ") {
-                charSpans[currentPos].classList.add('incorrect');
-            }
-            updateLiveStats();
-        }
+    function showWinModal() {
+      gameRunning = false;
+      document.getElementById('win-modal').style.display = 'flex';
+      document.getElementById('win-text').innerHTML = `
+        BEST SPEED: <span style="color:var(--main); font-size:2.8rem;">${bestWPM.toFixed(1)} WPM</span><br>
+        TIER: <span style="color:var(--main);">${getTierName(bestWPM)}</span><br>
+        SENTENCES: <span style="color:var(--main);">${sentencesCompleted}</span>
+      `;
+    }
 
-        function completeSentence() {
-            sentencesCompleted++;
-            const elapsedMin = (Date.now() - startTime) / 60000;
-            const currentWPM = elapsedMin > 0 ? Math.floor((totalCorrectChars / 5) / elapsedMin) : 0;
+    function hideWinModal() {
+      document.getElementById('win-modal').style.display = 'none';
+      gameRunning = true;
+    }
 
-            if (currentWPM > maxAverageWPM) maxAverageWPM = currentWPM;
+    function resetGame() {
+      bestWPM = 8;
+      totalCorrectChars = 0;
+      totalAttempts = 0;
+      totalEffective = 0;
+      sentencesCompleted = 0;
+      startTime = null;
+      currentSentenceIndex = 0;
+      gameRunning = true;
 
-            totalEffective += getTierCredit(maxAverageWPM);
+      meterFill.style.width = '0%';
+      sentencesTypedEl.textContent = '0 sentences';
+      effectiveUnitsEl.textContent = '0.0 effective';
+      progressPercentEl.textContent = '0%';
+      statusText.textContent = 'Waiting for first keystroke...';
 
-            sentencesTypedEl.textContent = `${sentencesCompleted} sentences`;
-            effectiveUnitsEl.textContent = `${totalEffective.toFixed(1)} effective`;
-            const percent = Math.min(100, totalEffective);
-            progressPercentEl.textContent = `${percent.toFixed(0)}%`;
-            meterFill.style.width = `${percent}%`;
+      renderSentence();
+      updateLiveStats();
+    }
 
-            currentSentenceIndex = (currentSentenceIndex + 1) % sentences.length;
-            renderSentence();
+    function init() {
+      sentenceDisplay = document.getElementById('sentence-display');
+      meterFill = document.getElementById('meter-fill');
+      liveWPMValue = document.getElementById('live-wpm-value');
+      avgWPMValue = document.getElementById('avg-wpm-value');
+      tierNameEl = document.getElementById('tier-name');
+      accuracyEl = document.getElementById('accuracy');
+      sentencesTypedEl = document.getElementById('sentences-typed');
+      effectiveUnitsEl = document.getElementById('effective-units');
+      progressPercentEl = document.getElementById('progress-percent');
+      statusText = document.getElementById('status-text');
 
-            if (totalEffective >= 100) showWinModal();
-            updateLiveStats();
-        }
+      const savedTheme = Number(localStorage.getItem('nitroTheme'));
+      if (!Number.isNaN(savedTheme) && themes[savedTheme]) {
+        document.documentElement.style.setProperty('--main', themes[savedTheme].main);
+        document.documentElement.style.setProperty('--accent', themes[savedTheme].accent);
+      }
 
-        function updateLiveStats() {
-            if (!startTime) return;
-            const elapsedMin = (Date.now() - startTime) / 60000;
-            const liveWPM = elapsedMin > 0 ? Math.floor((totalCorrectChars / 5) / elapsedMin) : 0;
+      renderSentence();
+      updateLiveStats();
+      document.addEventListener('keydown', handleKey);
 
-            liveWPMValue.textContent = String(liveWPM).padStart(3, '0');
-            avgWPMValue.textContent = String(Math.floor(maxAverageWPM)).padStart(3, '0');
-        }
+      setInterval(() => {
+        if (gameRunning && startTime) updateLiveStats();
+      }, 300);
+    }
 
-        function showWinModal() {
-            gameRunning = false;
-            document.getElementById('win-modal').style.display = 'flex';
-            document.getElementById('win-text').innerHTML = `
-                FINAL AVERAGE: <span style="color:var(--main); font-size:2.8rem;">${maxAverageWPM.toFixed(1)} WPM</span><br>
-                TIER: <span style="color:var(--main);">${getTierName(maxAverageWPM)}</span>
-            `;
-        }
-
-        function hideWinModal() {
-            document.getElementById('win-modal').style.display = 'none';
-            gameRunning = true;
-        }
-
-        function resetGame() {
-            totalCorrectChars = 0;
-            totalAttempts = 0;
-            totalEffective = 0;
-            sentencesCompleted = 0;
-            startTime = null;
-            currentSentenceIndex = 0;
-            maxAverageWPM = 8;
-            gameRunning = true;
-
-            meterFill.style.width = "0%";
-            sentencesTypedEl.textContent = "0 sentences";
-            effectiveUnitsEl.textContent = "0 effective";
-            progressPercentEl.textContent = "0%";
-            renderSentence();
-            statusText.textContent = "Waiting for first keystroke...";
-        }
-
-        function init() {
-            sentenceDisplay = document.getElementById('sentence-display');
-            meterFill = document.getElementById('meter-fill');
-            liveWPMValue = document.getElementById('live-wpm-value');
-            avgWPMValue = document.getElementById('avg-wpm-value');
-            sentencesTypedEl = document.getElementById('sentences-typed');
-            effectiveUnitsEl = document.getElementById('effective-units');
-            progressPercentEl = document.getElementById('progress-percent');
-            statusText = document.getElementById('status-text');
-
-            renderSentence();
-            document.addEventListener('keydown', handleKey);
-
-            setInterval(() => {
-                if (gameRunning && startTime) updateLiveStats();
-            }, 300);
-        }
-
-        window.onload = init;
-    </script>
+    window.addEventListener('load', init);
+  </script>
 </body>
 </html>

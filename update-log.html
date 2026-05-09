@@ -1,0 +1,27 @@
+<style>
+.update-log-overlay{display:flex;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:12000;align-items:center;justify-content:center;padding:1rem}.update-log-card{position:relative;width:min(92vw,680px);background:#18181b;border:5px solid var(--main);border-radius:24px;padding:1.4rem 1.4rem 1.6rem;box-shadow:0 0 65px rgba(0,0,0,.7),0 0 38px color-mix(in srgb,var(--main) 22%,transparent);font-family:VT323,monospace;color:white}.update-log-x{position:absolute;top:.7rem;right:.8rem;width:42px;height:42px;border-radius:999px;background:#27272a;color:white;border:2px solid #3f3f46;font-size:1.7rem;line-height:1;cursor:pointer}.update-log-card h2{margin:.4rem 3rem 1rem 0;color:var(--main);font-size:3.2rem;letter-spacing:2px}.update-log-section{border:1px solid #3f3f46;border-radius:18px;padding:1rem;margin:.8rem 0;background:#09090b}.update-log-label{color:var(--gold);font-size:1.45rem;margin-bottom:.45rem}.update-log-text{font-size:1.55rem;line-height:1.25;color:white}.update-log-list{font-size:1.45rem;color:var(--muted);line-height:1.35;margin:.4rem 0 0;padding-left:1.2rem}.update-log-continue{width:100%;margin-top:1rem;border-radius:999px;background:var(--main);color:#050505;font-size:1.7rem;padding:.9rem;cursor:pointer}
+</style>
+<div id="update-log-overlay" class="update-log-overlay" role="dialog" aria-modal="true" aria-label="Update log">
+  <div class="update-log-card">
+    <button class="update-log-x" onclick="closeUpdateLog()" aria-label="Close update log">×</button>
+    <h2>UPDATE LOG</h2>
+    <div class="update-log-section">
+      <div class="update-log-label">MESSAGE OF THE WEEK</div>
+      <div class="update-log-text">Welcome to WPMTest! This is still a test build, but the site now has login, signup, and leaderboard features. Anyone can visit, play, and try to get their name on the leaderboard. Make sure you sign up first so your score can be saved.</div>
+    </div>
+    <div class="update-log-section">
+      <div class="update-log-label">NEW IN THIS BUILD</div>
+      <ul class="update-log-list">
+        <li>Added account signup and login.</li>
+        <li>Added a public leaderboard.</li>
+        <li>Added score saving for signed-in players.</li>
+        <li>Added personal rank tracking.</li>
+      </ul>
+    </div>
+    <button class="update-log-continue" onclick="closeUpdateLog()">ENTER WPMTEST</button>
+  </div>
+</div>
+<script>
+function closeUpdateLog(){const overlay=document.getElementById('update-log-overlay');if(overlay)overlay.style.display='none';if(typeof gameRunning!=='undefined')gameRunning=true;}
+window.addEventListener('load',function(){if(typeof gameRunning!=='undefined')gameRunning=false;});
+</script>
